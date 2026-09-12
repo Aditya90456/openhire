@@ -21,6 +21,8 @@ from data import (
     load_interview_transcript,
 )
 
+# FastAPI app for deployment (Render expects uvicorn main:app)
+from api.app import app
 
 logger = setup_logging(__name__)
 
