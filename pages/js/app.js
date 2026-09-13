@@ -3,12 +3,10 @@
  */
 // The backend URL. When hosted on Vercel or locally, connects to the deployed Render backend
 // unless running on the same origin (e.g. backend serving /app).
-const DEFAULT_RENDER_BACKEND = 'https://openhire-xc9c.onrender.com';
-const API_BASE = window.OPENHIRE_API_URL || (
+const DEFAULT_RENDER_BACKEND = 'https://openhire.devsidd.tech';
+const API_BASE = window.OPENHIRE_API_URL || ((
   location.hostname === 'localhost' ||
-  location.hostname === '127.0.0.1' ||
-  location.hostname === 'onrender.com' ||
-  location.hostname.endsWith('.onrender.com')
+  location.hostname === '127.0.0.1')
     ? ''
     : DEFAULT_RENDER_BACKEND
 );
