@@ -25,6 +25,10 @@ edge-tts>=7.0.0
 # behaviour.
 asyncpg>=0.29.0
 
+# BYOK: encrypts user_llm_credentials.encrypted_key at rest (Fernet -
+# AES-128-CBC + HMAC-SHA256, authenticated by construction).
+cryptography>=42.0.0
+
 # Resume upload (POST /candidates/parse-resume-file, utils/resume_documents.py):
 # plain-text extraction from uploaded .pdf/.docx files before handing the
 # text to the existing ResumeParserAgent - no custom document parsing.

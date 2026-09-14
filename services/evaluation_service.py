@@ -81,6 +81,7 @@ from agents.resume_auditor.agent import ResumeAuditorAgent
 from agents.scoring.agent import ScoringAgent
 from agents.technical_evaluator.agent import TechnicalEvaluatorAgent
 from core.errors import ConflictError, NotFoundError
+from core.llm_context import reset_context_provider, set_context_provider
 from core.logging import get_logger, log_context
 from orchestration.graph import _build_evaluation_sections
 from repositories.interfaces import (
@@ -88,6 +89,7 @@ from repositories.interfaces import (
     EvaluationJob,
     EvaluationRepository,
     EvaluationStatus,
+    JobRepository,
     SessionRepository,
     TranscriptRepository,
 )
@@ -142,6 +144,31 @@ def _agent_error(agent_result: dict, result: dict) -> str:
     return result.get("error") or agent_result.get("error") or "unknown error"
 
 
+async def _resolve_llm_provider_for_job(
+    *, job_id: str, job_repository, llm_credential_service
+):
+    """Explicit provider resolution for the background evaluation path -
+    deliberately NOT the ContextVar (core/llm_context.py): this runs inside
+    a fire-and-forget asyncio.Task scheduled by EvaluationDispatcher, which
+    can outlive the HTTP request that triggered sealing/evaluation (that
+    request may not even have been the recruiter's - see spec 'The
+    boundary, stated plainly'). Looks up the job's owning recruiter
+    (JobRecord.created_by_user_id) and resolves THEIR credential, if any.
+
+    Returns None (falls through to get_llm_provider()'s normal env-based
+    resolution) when: llm_credential_service is None (BYOK not wired in -
+    the default, backward-compatible case), the job cannot be found, it has
+    no created_by_user_id (a practice job, or predates this field), or that
+    user has no saved credential.
+    """
+    if llm_credential_service is None:
+        return None
+    job_record = await job_repository.get(job_id)
+    if job_record is None or not job_record.created_by_user_id:
+        return None
+    return await llm_credential_service.resolve_provider_for_user(job_record.created_by_user_id)
+
+
 class EvaluationService:
     """Use cases for evaluation jobs.
 
@@ -161,14 +188,18 @@ class EvaluationService:
         transcript_repository: TranscriptRepository,
         application_repository: ApplicationRepository,
         dispatcher: EvaluationDispatcher,
+        job_repository: JobRepository,
         agent_factories: Optional[EvaluationAgentFactories] = None,
+        llm_credential_service=None,
     ) -> None:
         self._evaluations = evaluation_repository
         self._sessions = session_repository
         self._transcripts = transcript_repository
         self._applications = application_repository
         self._dispatcher = dispatcher
+        self._jobs = job_repository
         self._agents = agent_factories or EvaluationAgentFactories()
+        self._llm_credential_service = llm_credential_service
 
     # ------------------------------------------------------------------
     # Commands
@@ -354,14 +385,24 @@ class EvaluationService:
                 )
                 return
 
-            report, warnings, fatal_reason = await self._run_agents(
-                job_description=session_record.job_description,
-                parsed_resume=session_record.parsed_resume,
-                transcript=transcript,
-                matching_score=matching_score,
-                candidate_id=running.candidate_id,
-                run_id=running.evaluation_id,
+            job_provider = await _resolve_llm_provider_for_job(
+                job_id=running.job_id,
+                job_repository=self._jobs,
+                llm_credential_service=self._llm_credential_service,
             )
+            token = set_context_provider(job_provider) if job_provider is not None else None
+            try:
+                report, warnings, fatal_reason = await self._run_agents(
+                    job_description=session_record.job_description,
+                    parsed_resume=session_record.parsed_resume,
+                    transcript=transcript,
+                    matching_score=matching_score,
+                    candidate_id=running.candidate_id,
+                    run_id=running.evaluation_id,
+                )
+            finally:
+                if token is not None:
+                    reset_context_provider(token)
             if fatal_reason is not None:
                 await self._finish_failed(running, fatal_reason, warnings=warnings)
                 return

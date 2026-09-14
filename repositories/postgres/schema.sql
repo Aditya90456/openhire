@@ -468,3 +468,28 @@ CREATE TABLE IF NOT EXISTS audit_logs (
 -- Backs AuditLogRepository.list_for_admin(admin_id): "newest first".
 CREATE INDEX IF NOT EXISTS idx_audit_logs_admin_id_created_at
     ON audit_logs (admin_id, created_at DESC);
+
+-- ---------------------------------------------------------------------
+-- user_llm_credentials — LLMCredentialRecord (repositories/interfaces.py):
+-- BYOK. One row per user (user_id is the primary key, enforcing "one
+-- credential per user" in the schema, not in application code).
+-- ON DELETE CASCADE means deleting a user disposes of their key with no
+-- extra cleanup path. The whole table is only ever read/written when
+-- BYOK_ENCRYPTION_KEY is set (core/config.py) - see
+-- services/llm_credential_service.py.
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS user_llm_credentials (
+    user_id       text PRIMARY KEY REFERENCES users (user_id) ON DELETE CASCADE,
+    provider      text NOT NULL CHECK (provider IN ('openai','gemini','groq','nvidia_nim')),
+    model         text,
+    encrypted_key bytea NOT NULL,
+    -- Display-only fragment (e.g. "...ab12"), derived once at save time -
+    -- see repositories/interfaces.py:LLMCredentialRecord.
+    key_hint      text NOT NULL,
+    -- Exact CredentialStatus values (repositories/interfaces.py).
+    status        text NOT NULL DEFAULT 'active' CHECK (status IN ('active','failed')),
+    last_error    text,
+    last_error_at timestamptz,
+    created_at    timestamptz NOT NULL DEFAULT now(),
+    updated_at    timestamptz
+);

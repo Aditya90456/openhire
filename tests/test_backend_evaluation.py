@@ -30,6 +30,7 @@ from repositories.interfaces import Application, CandidateRecord, EvaluationStat
 from repositories.memory import (
     InMemoryApplicationRepository,
     InMemoryEvaluationRepository,
+    InMemoryJobRepository,
     InMemorySessionRepository,
     InMemoryTranscriptRepository,
 )
@@ -129,6 +130,7 @@ class _Harness:
         self.transcripts = InMemoryTranscriptRepository()
         self.applications = InMemoryApplicationRepository()
         self.evaluations = InMemoryEvaluationRepository()
+        self.jobs = InMemoryJobRepository()
         self.dispatcher = dispatcher or RecordingDispatcher()
 
         self.interview_service = InterviewService(
@@ -143,6 +145,7 @@ class _Harness:
             transcript_repository=self.transcripts,
             application_repository=self.applications,
             dispatcher=self.dispatcher,
+            job_repository=self.jobs,
             agent_factories=agent_factories,
         )
 
@@ -637,6 +640,7 @@ class TestEvaluationApi:
                 transcript_repository=app.state.container.transcript_repository,
                 application_repository=app.state.container.application_repository,
                 dispatcher=dispatcher,
+                job_repository=app.state.container.job_repository,
             )
             interview_service = InterviewService(
                 registry=app.state.registry,

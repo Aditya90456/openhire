@@ -49,10 +49,13 @@ from repositories.interfaces import (
     BugReportRepository,
     CandidateRecord,
     CandidateRepository,
+    CredentialStatus,
     EvaluationJob,
     EvaluationRepository,
     JobRecord,
     JobRepository,
+    LLMCredentialRecord,
+    LLMCredentialRepository,
     RepositoryError,
     SessionRecord,
     SessionRepository,
@@ -555,3 +558,29 @@ class InMemoryBugReportRepository(BugReportRepository):
         async with self._lock:
             reports = list(self._reports.values())
         return sorted(reports, key=lambda r: r.created_at, reverse=True)
+
+
+class InMemoryLLMCredentialRepository(LLMCredentialRepository):
+    """Dict-backed `LLMCredentialRepository`. TEMPORARY - see module docstring."""
+
+    def __init__(self) -> None:
+        self._credentials: Dict[str, LLMCredentialRecord] = {}
+        self._lock = asyncio.Lock()
+
+    async def save(self, record: LLMCredentialRecord) -> LLMCredentialRecord:
+        async with self._lock:
+            existing = self._credentials.get(record.user_id)
+            created_at = existing.created_at if existing else record.created_at
+            stored = record.model_copy(
+                update={"created_at": created_at, "updated_at": datetime.now(timezone.utc)}
+            )
+            self._credentials[record.user_id] = stored
+            return stored
+
+    async def get(self, user_id: str) -> Optional[LLMCredentialRecord]:
+        async with self._lock:
+            return self._credentials.get(user_id)
+
+    async def delete(self, user_id: str) -> None:
+        async with self._lock:
+            self._credentials.pop(user_id, None)

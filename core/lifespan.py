@@ -203,6 +203,19 @@ def validate_startup_configuration(
             "persistence is EPHEMERAL - see repositories/memory.py. Session "
             "records and sealed transcripts do not survive a restart."
         )
+    if settings.byok_encryption_key:
+        try:
+            from cryptography.fernet import Fernet
+
+            Fernet(settings.byok_encryption_key.encode("utf-8"))
+        except Exception:
+            logger.warning(
+                "BYOK_ENCRYPTION_KEY is set but is not a valid urlsafe-base64 "
+                "32-byte Fernet key - BYOK will behave as if the variable is "
+                "unset until this is corrected. Generate one with: "
+                "python3 -c \"from cryptography.fernet import Fernet; "
+                "print(Fernet.generate_key().decode())\"."
+            )
 
 
 def build_lifespan(settings: AppSettings):

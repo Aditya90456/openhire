@@ -19,6 +19,7 @@ from fastapi import Request, WebSocket
 from api.registry import SessionRegistry
 from core.config import AppSettings, get_settings
 from core.container import ServiceContainer, build_default_container
+from core.errors import ConfigurationError
 from repositories.interfaces import (
     RubricRepository,
     ApplicationRepository,
@@ -38,6 +39,7 @@ from services.candidate_service import CandidateService
 from services.evaluation_service import EvaluationService
 from services.interview_service import InterviewService
 from services.job_service import JobService
+from services.llm_credential_service import LLMCredentialService
 from services.matching_service import MatchingService
 from services.recruiter_service import RecruiterService
 
@@ -172,6 +174,21 @@ def get_bug_report_service(request: Request) -> BugReportService:
     return BugReportService(bug_report_repository=container.bug_report_repository)
 
 
+def get_llm_credential_service(request: Request) -> LLMCredentialService:
+    """Raises if BYOK is not configured (BYOK_ENCRYPTION_KEY unset) - every
+    route in api/routes/llm_credentials.py checks settings.byok_encryption_key
+    itself before calling this, so this should never actually be hit
+    without a key configured; the ValueError is a defensive backstop."""
+    container = _container_from_app(request.app)
+    settings = container.settings
+    if not settings.byok_encryption_key:
+        raise ConfigurationError("BYOK_ENCRYPTION_KEY is not configured")
+    return LLMCredentialService(
+        credential_repository=container.llm_credential_repository,
+        encryption_key=settings.byok_encryption_key,
+    )
+
+
 def get_matching_service(request: Request) -> MatchingService:
     container = _container_from_app(request.app)
     return MatchingService(
@@ -206,13 +223,23 @@ def build_evaluation_service(app) -> EvaluationService:
     real-world analog worth supporting.
     """
     container = _container_from_app(app)
+    llm_credential_service = None
+    if container.settings.byok_encryption_key:
+        from services.llm_credential_service import LLMCredentialService
+
+        llm_credential_service = LLMCredentialService(
+            credential_repository=container.llm_credential_repository,
+            encryption_key=container.settings.byok_encryption_key,
+        )
     return EvaluationService(
         evaluation_repository=container.evaluation_repository,
         session_repository=container.session_repository,
         transcript_repository=container.transcript_repository,
         application_repository=container.application_repository,
         dispatcher=container.evaluation_dispatcher,
+        job_repository=container.job_repository,
         agent_factories=container.evaluation_agent_factories_for(app),
+        llm_credential_service=llm_credential_service,
     )
 
 
@@ -278,6 +305,7 @@ __all__ = [
     "get_interview_service_ws",
     "get_job_repository",
     "get_job_service",
+    "get_llm_credential_service",
     "get_matching_service",
     "get_recruiter_service",
     "get_registry",

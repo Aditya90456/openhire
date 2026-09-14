@@ -49,6 +49,7 @@ from repositories.interfaces import RepositoryError, SessionRecord
 from repositories.memory import (
     InMemoryApplicationRepository,
     InMemoryAuditLogRepository,
+    InMemoryLLMCredentialRepository,
     InMemoryRubricRepository,
     InMemoryBugReportRepository,
     InMemoryCandidateRepository,
@@ -204,6 +205,7 @@ class TestStartupValidation:
             user_repository=InMemoryUserRepository(),
             bug_report_repository=InMemoryBugReportRepository(),
             audit_log_repository=InMemoryAuditLogRepository(),
+            llm_credential_repository=InMemoryLLMCredentialRepository(),
             evaluation_dispatcher=AsyncTaskEvaluationDispatcher(),
             auth_provider=AnonymousAuthProvider(),
             persistence_is_ephemeral=True,

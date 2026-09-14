@@ -21,6 +21,7 @@ every process start.
 from __future__ import annotations
 
 from repositories.postgres.audit_log_repository import PostgresAuditLogRepository
+from repositories.postgres.llm_credential_repository import PostgresLLMCredentialRepository
 from repositories.postgres.pool import PostgresConnectionPool
 from repositories.postgres.repository import (
     PostgresRubricRepository,
@@ -48,6 +49,7 @@ __all__ = [
     "PostgresCandidateRepository",
     "PostgresEvaluationRepository",
     "PostgresJobRepository",
+    "PostgresLLMCredentialRepository",
     "PostgresSessionRepository",
     "PostgresTranscriptRepository",
     "PostgresUserRepository",

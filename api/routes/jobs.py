@@ -10,6 +10,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, Query
 
+from api.dependencies import apply_llm_context_for_recruiter
 from api.models_applications import ApplicationListResponse, MatchingRunResponse
 from api.models_jobs import (
     CreateJobRequest,
@@ -37,7 +38,12 @@ from services.recruiter_service import RecruiterService
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 
 
-@router.post("", response_model=JobResponse, status_code=201)
+@router.post(
+    "",
+    response_model=JobResponse,
+    status_code=201,
+    dependencies=[Depends(apply_llm_context_for_recruiter)],
+)
 async def create_job(
     payload: CreateJobRequest,
     service: JobService = Depends(get_job_service),
@@ -59,7 +65,7 @@ async def create_job(
         job_id=payload.job_id,
         openings=payload.openings,
         is_practice=payload.is_practice,
-        created_by_user_id=(principal.subject_id or "user_anonymous") if payload.is_practice else None,
+        created_by_user_id=principal.subject_id or "user_anonymous",
     )
     return JobResponse.from_record(record)
 
@@ -130,7 +136,11 @@ async def archive_job(
     return JobResponse.from_record(record)
 
 
-@router.post("/{job_id}/match", response_model=MatchingRunResponse)
+@router.post(
+    "/{job_id}/match",
+    response_model=MatchingRunResponse,
+    dependencies=[Depends(apply_llm_context_for_recruiter)],
+)
 async def match_job(
     job_id: str,
     service: ApplicationService = Depends(get_application_service),

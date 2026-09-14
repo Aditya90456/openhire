@@ -88,14 +88,10 @@
   <div class="card" id="api-keys">
     <div class="card-header">
       <h3 class="card-title" style="font-size:1.05rem;">API Keys</h3>
-      <span class="tag">Coming soon</span>
     </div>
-    <p class="card-sub">
-      Bring your own API key to run OpenHire's pipeline against the provider
-      of your choice (OpenAI, Groq, Gemini, NVIDIA NIM). Key management
-      lands in a follow-up release.
-    </p>
-    <button class="btn-outline" disabled>Manage keys</button>
+    <div id="apiKeysBody">
+      <p class="card-sub">Loading…</p>
+    </div>
   </div>
 </main>
 
@@ -341,11 +337,128 @@ document.getElementById('passwordForm').addEventListener('submit', async (event)
   } else {
     await renderCandidateCard();
   }
+  await renderApiKeysCard(currentProfile);
 
   if (window.location.hash === '#api-keys') {
     document.getElementById('api-keys').scrollIntoView({ behavior: 'smooth' });
   }
 })();
+</script>
+<script>
+// Gemini-only for now - the other three native providers remain fully
+// supported server-side (build_provider) and can be re-added here later.
+const BYOK_PROVIDERS = [
+  { value: 'gemini', label: 'Gemini' },
+];
+
+// Known Gemini model names (config/settings.py's GEMINI_MODEL default is
+// first/pre-selected).
+const BYOK_GEMINI_MODELS = [
+  'gemini-flash-lite-latest',
+  'gemini-2.5-flash',
+  'gemini-2.5-pro',
+];
+
+async function fetchMyLlmCredential() {
+  return apiRequest('/auth/me/llm-credential');
+}
+
+function renderApiKeysEditableForm(container, credential) {
+  const options = BYOK_PROVIDERS.map(
+    (p) => `<option value="${p.value}" ${credential && credential.provider === p.value ? 'selected' : ''}>${p.label}</option>`
+  ).join('');
+  const modelOptions = BYOK_GEMINI_MODELS.map(
+    (m) => `<option value="${m}" ${credential && credential.model === m ? 'selected' : ''}>${m}</option>`
+  ).join('');
+  container.innerHTML = `
+    <p class="card-sub">
+      Bring your own API key to run OpenHire's pipeline against the provider
+      of your choice, spending your own quota instead of OpenHire's.
+    </p>
+    ${credential ? `
+      <p class="card-sub">
+        Current: <strong>${credential.provider}</strong>${credential.model ? ` (${credential.model})` : ''},
+        key <code>${credential.key_hint}</code>
+      </p>
+      ${credential.status === 'failed' ? `<p class="form-status error">This key stopped working: ${credential.last_error || 'unknown error'}. OpenHire is using its own key until you save a new one.</p>` : ''}
+      <button class="btn-outline" id="removeApiKeyBtn" type="button">Remove key</button>
+    ` : ''}
+    <form id="apiKeyForm" style="margin-top:1rem;">
+      <div class="form-group">
+        <label class="form-label" for="apiKeyProvider">Provider</label>
+        <select class="form-control" id="apiKeyProvider">${options}</select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="apiKeyModel">Model</label>
+        <select class="form-control" id="apiKeyModel">${modelOptions}</select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="apiKeyValue">API key</label>
+        <input class="form-control" id="apiKeyValue" type="password" autocomplete="off" required>
+      </div>
+      <button type="submit" class="btn-primary">${credential ? 'Replace key' : 'Save key'}</button>
+      <div class="form-status" id="apiKeyFormStatus"></div>
+    </form>
+  `;
+
+  document.getElementById('apiKeyForm').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const status = document.getElementById('apiKeyFormStatus');
+    status.textContent = '';
+    status.className = 'form-status';
+    try {
+      const saved = await apiRequest('/auth/me/llm-credential', {
+        method: 'PUT',
+        body: {
+          provider: document.getElementById('apiKeyProvider').value,
+          model: document.getElementById('apiKeyModel').value || null,
+          api_key: document.getElementById('apiKeyValue').value,
+        },
+      });
+      status.textContent = 'Saved.';
+      status.classList.add('success');
+      renderApiKeysEditableForm(container, saved);
+    } catch (err) {
+      status.textContent = err.message || 'Could not save this key.';
+      status.classList.add('error');
+    }
+  });
+
+  const removeBtn = document.getElementById('removeApiKeyBtn');
+  if (removeBtn) {
+    removeBtn.addEventListener('click', async () => {
+      try {
+        await apiRequest('/auth/me/llm-credential', { method: 'DELETE' });
+        renderApiKeysEditableForm(container, null);
+      } catch (err) {
+        alert(err.message || 'Could not remove this key.');
+      }
+    });
+  }
+}
+
+async function renderApiKeysCard(profile) {
+  const container = document.getElementById('apiKeysBody');
+  if (profile.user_type !== 'candidate') {
+    container.innerHTML = `
+      <p class="card-sub">
+        Bring-your-own-key is available for candidate accounts. As a
+        ${profile.user_type}, OpenHire's own key is always used on your behalf.
+      </p>
+    `;
+    return;
+  }
+  try {
+    const credential = await fetchMyLlmCredential();
+    renderApiKeysEditableForm(container, credential);
+  } catch (err) {
+    if (err.status === 404) {
+      container.innerHTML = `<p class="card-sub">API keys are not enabled on this deployment yet.</p>`;
+      return;
+    }
+    container.innerHTML = `<p class="card-sub">Could not load your API key settings: ${err.message}</p>`;
+  }
+}
 </script>
 </body>
 </html>

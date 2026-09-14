@@ -361,6 +361,14 @@ EMBEDDING_PROVIDER=local
 VECTOR_STORE_TYPE=faiss
 ```
 
+### Bring your own key
+
+Candidates can save their own Gemini API key on their profile page instead
+of using OpenHire's shared quota. Set `BYOK_ENCRYPTION_KEY` to enable it
+(unset by default — the feature is fully inert until then). See
+[`docs/byok.md`](docs/byok.md) for the full contract and key-handling
+guarantees.
+
 ### Running Tests
 
 ```bash

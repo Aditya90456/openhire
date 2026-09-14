@@ -40,6 +40,7 @@ from api.routes.admin import router as admin_router
 from api.routes.applications import router as applications_router
 from api.routes.auth import router as auth_router
 from api.routes.bugs import router as bugs_router
+from api.routes.llm_credentials import router as llm_credentials_router
 from api.routes.candidates import router as candidates_router
 from api.routes.evaluations import router as evaluations_router
 from api.routes.interview import router as interview_router
@@ -133,6 +134,7 @@ def create_app(settings: AppSettings | None = None) -> FastAPI:
     app.include_router(applications_router, prefix=settings.api_prefix)
     app.include_router(evaluations_router, prefix=settings.api_prefix)
     app.include_router(bugs_router, prefix=settings.api_prefix)
+    app.include_router(llm_credentials_router, prefix=settings.api_prefix)
 
     @app.api_route(
         f"{settings.api_prefix}/health",

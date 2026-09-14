@@ -903,3 +903,62 @@ class BugReportRepository(ABC):
     @abstractmethod
     async def list_all(self) -> list[BugReportRecord]:
         """Every report, newest first - OpenBox's own feed."""
+
+
+class CredentialStatus(str, Enum):
+    """Whether a saved BYOK credential is currently usable.
+
+    ACTIVE  the credential has not failed since it was last saved.
+    FAILED  the most recent attempt to use it failed (bad/revoked key, or a
+            rate limit) - FallbackLLMProvider (providers/llm/fallback.py)
+            sets this so the profile page can surface `last_error` to the
+            user, while the call that triggered it still completes on the
+            system key.
+    """
+
+    ACTIVE = "active"
+    FAILED = "failed"
+
+
+class LLMCredentialRecord(BaseModel):
+    """One candidate's BYOK credential (docs/superpowers/specs/2026-09-06-byok-design.md).
+
+    `user_id` is the primary key in storage (one credential per user - see
+    `repositories/postgres/schema.sql`'s `user_llm_credentials` table).
+    `encrypted_key` is a Fernet token (services/llm_credential_service.py
+    encrypts/decrypts it); the plaintext key never reaches this model.
+    `key_hint` is a display-only fragment (e.g. "...ab12") derived once at
+    save time, so the profile page can show *which* key is saved without
+    ever holding the key itself.
+    """
+
+    model_config = ConfigDict(frozen=False)
+
+    user_id: str
+    provider: str
+    model: Optional[str] = None
+    encrypted_key: bytes
+    key_hint: str
+    status: CredentialStatus = CredentialStatus.ACTIVE
+    last_error: Optional[str] = None
+    last_error_at: Optional[datetime] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: Optional[datetime] = None
+
+
+class LLMCredentialRepository(ABC):
+    """Durable storage for `LLMCredentialRecord`. One row per user."""
+
+    @abstractmethod
+    async def save(self, record: LLMCredentialRecord) -> LLMCredentialRecord:
+        """Insert or update by `user_id`. Idempotent; preserves the
+        original `created_at` across an update."""
+
+    @abstractmethod
+    async def get(self, user_id: str) -> Optional[LLMCredentialRecord]:
+        """The record, or None. Never raises for absence."""
+
+    @abstractmethod
+    async def delete(self, user_id: str) -> None:
+        """Remove the row. Idempotent - deleting an absent row is a no-op
+        success, not an error."""
