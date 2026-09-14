@@ -52,6 +52,7 @@ from repositories.interfaces import (
     CandidateRepository,
     EvaluationRepository,
     JobRepository,
+    LLMCredentialRepository,
     SessionRepository,
     TranscriptRepository,
     UserRepository,
@@ -104,6 +105,11 @@ class ServiceContainer:
     bug_report_repository: BugReportRepository
     # Admin console: impersonation accountability trail (Task 2/3).
     audit_log_repository: AuditLogRepository
+    # BYOK: one credential per user. Always constructed regardless of
+    # whether BYOK_ENCRYPTION_KEY is set - the repository existing costs
+    # nothing; core/llm_context.py is what actually gates on the key being
+    # present before ever reading from it.
+    llm_credential_repository: LLMCredentialRepository
     auth_provider: AuthProvider = field(default_factory=AnonymousAuthProvider)
 
     # True while any repository above is one of the temporary in-process
@@ -242,6 +248,7 @@ def build_default_container(settings: AppSettings) -> ServiceContainer:
             PostgresConnectionPool,
             PostgresEvaluationRepository,
             PostgresJobRepository,
+            PostgresLLMCredentialRepository,
             PostgresSessionRepository,
             PostgresTranscriptRepository,
             PostgresUserRepository,
@@ -267,6 +274,7 @@ def build_default_container(settings: AppSettings) -> ServiceContainer:
             user_repository=user_repo,
             bug_report_repository=PostgresBugReportRepository(pool),
             audit_log_repository=PostgresAuditLogRepository(pool),
+            llm_credential_repository=PostgresLLMCredentialRepository(pool),
             evaluation_dispatcher=AsyncTaskEvaluationDispatcher(),
             auth_provider=auth_provider,
             persistence_is_ephemeral=False,
@@ -282,6 +290,7 @@ def build_default_container(settings: AppSettings) -> ServiceContainer:
         InMemoryCandidateRepository,
         InMemoryEvaluationRepository,
         InMemoryJobRepository,
+        InMemoryLLMCredentialRepository,
         InMemorySessionRepository,
         InMemoryTranscriptRepository,
         InMemoryUserRepository,
@@ -307,6 +316,7 @@ def build_default_container(settings: AppSettings) -> ServiceContainer:
         user_repository=InMemoryUserRepository(),
         bug_report_repository=InMemoryBugReportRepository(),
         audit_log_repository=InMemoryAuditLogRepository(),
+        llm_credential_repository=InMemoryLLMCredentialRepository(),
         evaluation_dispatcher=AsyncTaskEvaluationDispatcher(),
         auth_provider=AnonymousAuthProvider(),
         persistence_is_ephemeral=True,

@@ -314,6 +314,33 @@ async def require_admin(
     return principal
 
 
+async def require_candidate(
+    principal: Principal = Depends(require_authenticated),
+    settings: AppSettings = Depends(get_settings),
+) -> Principal:
+    """Endpoint dependency: reject any caller who is not a candidate.
+
+    Mirrors `require_authenticated` (inert while `AUTH_ENABLED=false`), plus
+    one addition: the caller's `principal_type` must be `CANDIDATE`. Unlike
+    `require_admin`, this does not re-query the database for freshness -
+    gating a self-service feature (BYOK) does not carry the same elevated-
+    trust requirement that admin-only actions do.
+    """
+    if not settings.auth_enabled:
+        return principal
+    if not principal.is_authenticated:
+        raise UnauthorizedError()
+    if principal.principal_type is not PrincipalType.CANDIDATE:
+        raise ForbiddenError(
+            "This action requires a candidate account.",
+            internal_detail=(
+                f"principal subject_id={principal.subject_id!r} has "
+                f"principal_type={principal.principal_type.value!r}, not candidate"
+            ),
+        )
+    return principal
+
+
 __all__ = [
     "ANONYMOUS",
     "AnonymousAuthProvider",
@@ -325,5 +352,6 @@ __all__ = [
     "get_principal",
     "require_admin",
     "require_authenticated",
+    "require_candidate",
     "require_scopes",
 ]

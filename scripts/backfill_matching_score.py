@@ -89,6 +89,7 @@ async def backfill(application_id: str, *, retry_evaluation: bool) -> None:
             transcript_repository=container.transcript_repository,
             application_repository=container.application_repository,
             dispatcher=container.evaluation_dispatcher,
+            job_repository=container.job_repository,
             agent_factories=container.evaluation_agent_factories_for(None),
         )
         if application.session_id is None:

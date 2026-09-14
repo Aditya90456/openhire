@@ -129,7 +129,7 @@ class RecruiterHarness:
         self.evaluation_service = EvaluationService(
             evaluation_repository=self.evaluations, session_repository=self.sessions,
             transcript_repository=self.transcripts, application_repository=self.applications,
-            dispatcher=self.dispatcher,
+            dispatcher=self.dispatcher, job_repository=self.jobs,
         )
         self.recruiter_service = RecruiterService(
             job_repository=self.jobs, application_repository=self.applications,
@@ -682,6 +682,7 @@ def _seed_http(app, candidate_id, job_id, application_id, *, run_eval, seal=True
             transcript_repository=container.transcript_repository,
             application_repository=container.application_repository,
             dispatcher=dispatcher,
+            job_repository=container.job_repository,
         )
         job = await evaluation_service.trigger_evaluation(session_id)
         if run_eval == "pending":

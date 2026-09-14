@@ -1,3 +1,5 @@
+> **Superseded.** See `docs/superpowers/specs/2026-09-06-byok-design.md` and `docs/superpowers/plans/2026-09-14-byok-v2.md`. This document describes an earlier design (OpenAI-only, request-scoped keys, no accounts system) that was not implemented and does not reflect the current codebase.
+
 # Bring Your Own Key (BYOK) — Design
 
 ## Problem

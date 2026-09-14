@@ -173,6 +173,17 @@ class AppSettings(BaseModel):
     # persistence is durable, never the DSN itself.
     database_url: str = ""
 
+    # BYOK (docs/superpowers/specs/2026-09-06-byok-design.md): a
+    # urlsafe-base64 32-byte Fernet key used to encrypt
+    # user_llm_credentials.encrypted_key at rest. None (the default) means
+    # BYOK is off - the table is never read, no ContextVar is set, and the
+    # profile page's API Keys card shows its placeholder copy. A malformed
+    # value is caught in core/lifespan.py's validate_startup_configuration,
+    # which WARNS and disables BYOK rather than refusing to boot - an
+    # encryption misconfiguration must not take production down (spec
+    # "Feature flag and failure-closed behaviour").
+    byok_encryption_key: Optional[str] = None
+
     # ------------------------------------------------------------------
     # Read-through views of config/settings.py (never copies - see docstring)
     # ------------------------------------------------------------------
@@ -311,6 +322,7 @@ class AppSettings(BaseModel):
             access_token_expire_minutes=_env_int("ACCESS_TOKEN_EXPIRE_MINUTES", 15),
             refresh_token_expire_days=_env_int("REFRESH_TOKEN_EXPIRE_DAYS", 7),
             database_url=_env("DATABASE_URL", ""),
+            byok_encryption_key=_env("BYOK_ENCRYPTION_KEY") or None,
         )
 
 

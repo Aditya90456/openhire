@@ -66,3 +66,6 @@ chroma_db/
 
 RENDER_DEPLOYMENT.md
 PRODUCTION_SETUP.md
+
+# Git worktrees (scratch workspaces for isolated feature work)
+.worktrees/
