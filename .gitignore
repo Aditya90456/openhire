@@ -1,19 +1,24 @@
-# Environment variables
-.env
-.env.local
-.env.*.local
-.env.production
-.env.staging
+# =============================================================================
+# OpenHire .gitignore
+# =============================================================================
 
-# Python
+# Environments & Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.cert
+
+# Python Artifacts & Bytecode
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
 build/
-develop-eggs/
 dist/
+develop-eggs/
 downloads/
 eggs/
 .eggs/
@@ -30,42 +35,56 @@ share/python-wheels/
 *.egg
 MANIFEST
 
-# Virtual environments
+# Virtual Environments
+.venv
+.venv/
+.venv*/
 venv/
 ENV/
 env/
-.venv
 
-# IDE
-.vscode/
-.agent
-.idea/
-.agent
-*.swp
-*.swo
-.superpowers
-.claude
-*~
-.DS_Store
-
-# Testing
+# Testing, Quality & Coverage
 .pytest_cache/
 .coverage
+coverage.xml
 htmlcov/
 .tox/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
 
-# Outputs
+# IDE, Editors & OS Files
+.vscode/
+.idea/
+.cursor/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# AI Assistant Caches & Workspace Scratch
+.claude/
+.superpowers/
+.agent/
+.gemini/
+
+# Output Data & Logs
 outputs/
+logs/
 *.log
 
-# Vector stores
+# Vector Stores & Databases
 faiss_index/
 chroma_db/
+*.sqlite
+*.sqlite3
+*.db
 
-#md files
-
+# Internal Setup & Scratch Docs
 RENDER_DEPLOYMENT.md
 PRODUCTION_SETUP.md
+todo.md
 
-# Git worktrees (scratch workspaces for isolated feature work)
+# Git Worktrees
 .worktrees/

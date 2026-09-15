@@ -1,7 +1,7 @@
 /**
  * Minimal & fast navigation and state handler
  */
-// The backend URL. When hosted on Vercel or locally, connects to the deployed Render backend
+// The backend URL. When hosted on Vercel or locally, connects to the deployed EC2 backend
 // unless running on the same origin (e.g. backend serving /app).
 const DEFAULT_RENDER_BACKEND = 'https://openhire.devsidd.tech';
 const API_BASE = DEFAULT_RENDER_BACKEND || ((
