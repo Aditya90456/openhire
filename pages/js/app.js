@@ -475,11 +475,9 @@ function toggleNavMenu(event) {
  * everything instantly.
  */
 function initReveal() {
-  const els = document.querySelectorAll('.reveal');
-  if (!els.length) return;
   const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (!('IntersectionObserver' in window) || reduce) {
-    els.forEach((el) => el.classList.add('visible'));
+  if (!('IntersectionObserver' in window)) {
+    document.querySelectorAll('.reveal').forEach((el) => el.classList.add('visible'));
     return;
   }
   const io = new IntersectionObserver((entries) => {
@@ -490,7 +488,10 @@ function initReveal() {
       }
     });
   }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
-  els.forEach((el) => {
+  const seen = new WeakSet();
+  const observeEl = (el) => {
+    if (seen.has(el) || el.classList.contains('visible')) return;
+    seen.add(el);
     const stagger = el.parentElement && el.parentElement.classList.contains('reveal-stagger');
     if (stagger) {
       const idx = Array.prototype.indexOf.call(el.parentElement.children, el);
@@ -499,7 +500,21 @@ function initReveal() {
       el.style.setProperty('--i', el.dataset.revealDelay);
     }
     io.observe(el);
-  });
+  };
+  if (reduce) {
+    document.querySelectorAll('.reveal').forEach((el) => el.classList.add('visible'));
+    return;
+  }
+  document.querySelectorAll('.reveal').forEach(observeEl);
+  new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      for (const node of mutation.addedNodes) {
+        if (node.nodeType !== 1) continue;
+        if (node.classList && node.classList.contains('reveal')) observeEl(node);
+        if (node.querySelectorAll) node.querySelectorAll('.reveal').forEach(observeEl);
+      }
+    }
+  }).observe(document.body, { childList: true, subtree: true });
 }
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initReveal);
