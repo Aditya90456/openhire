@@ -6,7 +6,8 @@
 <title>OpenHire — Post Job</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -14,15 +15,21 @@
 <div id="impersonationBanner"></div>
 
 <main class="container">
-  <div style="max-width: 680px; margin: 1.5rem auto;" class="card">
+  <div class="page-head reveal">
+    <div class="eyebrow">workspace / recruiter</div>
+    <h1 class="page-title">Post a position</h1>
+    <p class="page-sub">Paste the job description. Competencies, interview questions, and the scoring rubric are extracted automatically.</p>
+  </div>
+
+  <div style="max-width: 680px; margin: 1.5rem 0;" class="card reveal">
     <div class="card-header">
       <div>
-        <h2 class="card-title">Post Job Description</h2>
-        <p class="card-sub">Extract technical competencies and rubrics using <code>JDAnalyzerAgent</code>.</p>
+        <h3 class="card-title">Job details</h3>
+        <p class="card-sub">Uses <code>JDAnalyzerAgent</code> to derive technical competencies and rubrics.</p>
       </div>
-      <button class="btn-outline" onclick="window.location.href='recruiter.html'">Back</button>
+      <button class="btn-outline" onclick="window.location.href='recruiter.html'"><i class="ph-bold ph-arrow-left"></i>Back</button>
     </div>
-    
+
     <div class="form-group" style="margin-top:1.25rem;">
       <label class="form-label">Position Title</label>
       <input type="text" id="jobTitle" class="form-control" placeholder="e.g. Distributed Systems Engineer">
@@ -31,7 +38,7 @@
     <div class="form-group">
       <label class="form-label">Target Number of Openings / Vacancies</label>
       <input type="number" id="jobOpenings" class="form-control" placeholder="1" value="1" min="1" max="100">
-      <p style="font-size:0.8rem; color:var(--text-muted); margin-top:0.25rem;">
+      <p class="form-hint">
         After AI interviews, exactly this number of top-ranked candidates will be automatically selected for hire/offer on the leaderboard.
       </p>
     </div>
@@ -41,7 +48,7 @@
       <textarea id="jobDescription" class="form-control" rows="8" placeholder="We are seeking an engineer experienced in Python, high-throughput microservices, PostgreSQL, and distributed caching..."></textarea>
     </div>
 
-    <button class="btn-primary" id="btnSubmit" style="width:100%; margin-top:0.5rem;" onclick="handleJobCreate()">Analyze & Publish Position</button>
+    <button class="btn-primary" id="btnSubmit" style="width:100%; margin-top:0.5rem;" onclick="handleJobCreate()"><i class="ph-bold ph-scanner"></i>Analyze &amp; Publish Position</button>
   </div>
 </main>
 

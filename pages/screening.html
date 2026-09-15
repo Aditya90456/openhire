@@ -6,55 +6,28 @@
 <title>OpenHire — Resume Screening</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css">
 <link rel="stylesheet" href="css/style.css">
-<style>
-  .stats-strip {
-    display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));
-    background:var(--surface);
-    border:1px solid var(--surface-border);
-    border-radius:var(--radius-lg);
-    margin-bottom:1.5rem;
-    overflow:hidden;
-  }
-  .stat-cell { padding:1rem 1.25rem; border-right:1px solid var(--surface-border); }
-  .stat-cell:last-child { border-right:none; }
-  .stat-num { font-size:1.5rem; font-weight:700; color:var(--text-main); font-family:var(--font-mono); line-height:1.1; }
-  .stat-label { font-size:0.72rem; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted); margin-top:0.3rem; }
-  .filter-tabs { display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1rem; }
-  .filter-tab { background:var(--surface); border:1px solid var(--surface-border); border-radius:var(--radius); padding:0.4rem 0.85rem; font-size:12.5px; font-weight:500; cursor:pointer; color:var(--text-muted); transition:all 0.15s; }
-  .filter-tab:hover { color:var(--text-main); border-color:var(--primary); }
-  .filter-tab.active { background:var(--primary); color:#fff; border-color:var(--primary); }
-  .evidence { margin-top:0.6rem; border-top:1px solid var(--border, rgba(0,0,0,0.08)); padding-top:0.6rem; }
-  .evidence summary { cursor:pointer; font-family:var(--font-mono); font-size:11px; text-transform:uppercase; color:var(--text-muted); }
-  .competency { margin:0.6rem 0 0.8rem; }
-  .competency-head { display:flex; justify-content:space-between; align-items:baseline; gap:0.75rem; }
-  .quote { border-left:2px solid var(--primary); padding:0.2rem 0 0.2rem 0.6rem; margin:0.35rem 0; font-size:0.82rem; color:var(--text-main); line-height:1.5; }
-  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.6); display:none; align-items:center; justify-content:center; z-index:1000; padding:1rem; }
-  .modal-box { background:var(--surface, #fff); border:1px solid var(--surface-border); border-radius:var(--radius, 8px); max-width:700px; width:100%; max-height:90vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 20px 25px -5px rgba(0,0,0,0.2); }
-  .modal-header { padding:1rem 1.25rem; border-bottom:1px solid var(--surface-border); display:flex; justify-content:space-between; align-items:center; }
-  .modal-body { padding:1.25rem; overflow-y:auto; flex:1; font-size:0.9rem; }
-</style>
 </head>
 <body>
 <div id="navbarContainer"></div>
 <div id="impersonationBanner"></div>
 
 <main class="container">
-  <div class="card-header" style="margin-bottom:1.5rem;">
-    <div>
-      <h2 class="card-title">Resume Screening & Candidate Resumes</h2>
-      <p class="card-sub" id="screeningMeta">Every applicant is scored and shortlisted automatically the moment they apply - review the results below.</p>
-    </div>
-    <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-      <button class="btn-secondary" onclick="runMatching()" title="Applications are already scored on apply - this only retries anyone stuck pending (e.g. a scoring failure, or a rubric approved after they applied)">Retry Pending Scores</button>
-      <button class="btn-outline" onclick="goToLeaderboard()">Final Leaderboard</button>
-      <button class="btn-outline" onclick="window.history.back()">Back</button>
-    </div>
+  <div class="page-head reveal">
+    <div class="eyebrow">workspace / recruiter</div>
+    <h1 class="page-title">Resume Screening</h1>
+    <p class="card-sub" id="screeningMeta">Every applicant is scored and shortlisted automatically the moment they apply — review the results below.</p>
   </div>
 
-  <div class="stats-strip" id="screeningStats">
+  <div class="page-actions reveal" style="margin-bottom:1.5rem;">
+    <button class="btn-secondary" onclick="runMatching()" title="Applications are already scored on apply - this only retries anyone stuck pending (e.g. a scoring failure, or a rubric approved after they applied)"><i class="ph-bold ph-arrows-clockwise"></i>Retry Pending Scores</button>
+    <button class="btn-outline" onclick="goToLeaderboard()"><i class="ph-bold ph-ranking"></i>Final Leaderboard</button>
+    <button class="btn-outline" onclick="window.history.back()"><i class="ph-bold ph-arrow-left"></i>Back</button>
+  </div>
+
+  <div class="stats-strip reveal" id="screeningStats">
     <div class="stat-cell">
       <div class="stat-num" id="statTotal">0</div>
       <div class="stat-label">Total Applicants</div>
@@ -68,7 +41,7 @@
       <div class="stat-label">Needs Review</div>
     </div>
     <div class="stat-cell">
-      <div class="stat-num" id="statRejected" style="color:var(--text-faint);">0</div>
+      <div class="stat-num" id="statRejected" style="color:var(--ink-3);">0</div>
       <div class="stat-label">Rejected</div>
     </div>
     <div class="stat-cell">
@@ -77,9 +50,9 @@
     </div>
   </div>
 
-  <div class="card" id="rubricBanner" style="margin-bottom:1.25rem; display:none;"></div>
+  <div class="card" id="rubricBanner" style="margin-bottom:1.25rem; display:none; border-left:3px solid var(--ink);"></div>
 
-  <div style="display:flex; justify-content:space-between; align-items:center; gap:0.75rem; flex-wrap:wrap; margin-bottom:1rem;">
+  <div class="reveal" style="display:flex; justify-content:space-between; align-items:center; gap:0.75rem; flex-wrap:wrap; margin-bottom:1rem;">
     <div class="filter-tabs" id="filterTabs">
       <button class="filter-tab active" onclick="setFilter('all')">All (<span id="countAll">0</span>)</button>
       <button class="filter-tab" onclick="setFilter('shortlisted')">Shortlisted (<span id="countShortlisted">0</span>)</button>
@@ -92,7 +65,7 @@
     </div>
   </div>
 
-  <div class="card" style="margin-bottom:1.25rem;">
+  <div class="card reveal" style="margin-bottom:1.25rem;">
     <div id="applicantListContainer">
       <!-- Dynamic list -->
     </div>
@@ -104,10 +77,10 @@
   <div class="modal-box" onclick="event.stopPropagation()">
     <div class="modal-header">
       <div>
-        <h3 id="modalCandidateName" style="font-weight:700; font-size:1.15rem; margin:0;">Candidate Resume</h3>
+        <h3 id="modalCandidateName" style="font-family:var(--font-serif); font-weight:400; font-size:1.2rem; margin:0; letter-spacing:-0.01em;">Candidate Profile</h3>
         <p id="modalCandidateMeta" class="card-sub" style="margin:0; font-size:12px; font-family:var(--font-mono);"></p>
       </div>
-      <button class="btn-outline" style="padding:0.25rem 0.5rem; font-size:12px;" onclick="closeResumeModal()">✕ Close</button>
+      <button class="btn-ghost modal-close" style="padding:0.3rem 0.5rem; font-size:13px;" onclick="closeResumeModal()"><i class="ph-bold ph-x"></i><span class="visually-readable" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);">Close</span></button>
     </div>
     <div class="modal-body" id="modalResumeBody">
       Loading resume details…
@@ -147,8 +120,8 @@
     return `
       <div class="competency">
         <div class="competency-head">
-          <strong style="color:var(--text-main); font-size:0.88rem;">${escapeHtml(verdict.competency_name)}</strong>
-          <span style="font-family:var(--font-mono); font-size:11.5px; color:var(--text-muted);">
+          <strong style="color:var(--ink); font-size:0.88rem;">${escapeHtml(verdict.competency_name)}</strong>
+          <span style="font-family:var(--font-mono); font-size:11.5px; color:var(--ink-3);">
             ${verdict.score}/5 · ${escapeHtml(verdict.evidence_sufficiency)}
           </span>
         </div>
@@ -165,22 +138,22 @@
 
   function getStatusBadge(status) {
     if (status === 'shortlisted') {
-      return '<span class="tag" style="background:var(--success-subtle); color:var(--success-text); border-color:rgba(16,185,129,0.3); font-weight:600;">Auto-Shortlisted</span>';
+      return '<span class="chip chip-success">Auto-Shortlisted</span>';
     } else if (status === 'interview_linked') {
-      return '<span class="tag" style="background:var(--primary-subtle); color:var(--primary); border-color:var(--primary-glow); font-weight:600;">Interview Linked</span>';
+      return '<span class="chip chip-info">Interview Linked</span>';
     } else if (status === 'rejected') {
-      return '<span class="tag">Rejected</span>';
+      return '<span class="chip">Rejected</span>';
     } else if (status === 'needs_human_review') {
-      return '<span class="tag" style="background:var(--warning-subtle); color:var(--warning-text); border-color:rgba(245,158,11,0.3);">Needs Review</span>';
+      return '<span class="chip chip-warning">Needs Review</span>';
     }
-    return `<span class="tag">${escapeHtml((status || 'pending').replace(/_/g, ' '))}</span>`;
+    return `<span class="chip">${escapeHtml((status || 'pending').replace(/_/g, ' '))}</span>`;
   }
 
   function applicantRow(row) {
     const rankLabel = row.rank
-      ? `<span style="font-family:var(--font-mono); font-weight:700; color:var(--primary); margin-right:0.4rem;">#${row.rank}</span>`
+      ? `<span style="font-family:var(--font-mono); font-weight:500; color:var(--ink); margin-right:0.4rem;">#${row.rank}</span>`
       : '';
-    
+
     const skillsList = (row.skills || []).slice(0, 5).map(s => `<span class="tag" style="font-size:11px;">${escapeHtml(s)}</span>`).join(' ');
     const expText = row.total_experience_years != null ? ` · ${row.total_experience_years} yrs exp` : '';
     const emailText = row.email ? ` · ${escapeHtml(row.email)}` : '';
@@ -193,11 +166,11 @@
       </details>` : '';
 
     return `
-      <div style="padding:1rem 0; border-bottom:1px solid var(--border, rgba(0,0,0,0.08));">
+      <div style="padding:1rem 0; border-bottom:1px solid var(--surface-border);">
         <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; flex-wrap:wrap;">
           <div style="min-width:240px; flex:1;">
             <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; margin-bottom:0.25rem;">
-              <span style="font-weight:600; font-size:1.05rem; color:var(--text-main);">
+              <span style="font-weight:600; font-size:1.05rem; color:var(--ink); letter-spacing:-0.01em;">
                 ${rankLabel}${escapeHtml(row.candidate_name)}
               </span>
               ${getStatusBadge(row.status)}
@@ -213,13 +186,13 @@
             ${scorePill(row.match_score, 'Rubric')}
             ${scorePill(row.semantic_score, 'Semantic')}
             ${row.band ? `<span class="tag">${escapeHtml(row.band)}</span>` : ''}
-            <button class="btn-primary" style="padding:0.25rem 0.65rem; font-size:11.5px;"
-              onclick="viewResume('${row.candidate_id}')">📄 View Resume</button>
+            <button class="btn-secondary btn-sm" style="min-height:30px;"
+              onclick="viewResume('${row.candidate_id}')"><i class="ph-bold ph-file-text"></i>View Resume</button>
             ${row.status !== 'shortlisted' && row.status !== 'interview_linked' ? `
-            <button class="btn-secondary" style="padding:0.25rem 0.6rem; font-size:11.5px;" title="Manual override - the automated decision above already ran"
+            <button class="btn-sm btn-secondary" title="Manual override - the automated decision above already ran"
               onclick="decide('${row.application_id}', 'shortlist')">Override: Shortlist</button>` : ''}
             ${row.status !== 'rejected' ? `
-            <button class="btn-outline" style="padding:0.25rem 0.6rem; font-size:11.5px;" title="Manual override - the automated decision above already ran"
+            <button class="btn-sm btn-outline" title="Manual override - the automated decision above already ran"
               onclick="decide('${row.application_id}', 'reject')">Override: Reject</button>` : ''}
           </div>
         </div>
@@ -243,11 +216,11 @@
       const banner = document.getElementById('rubricBanner');
       banner.style.display = 'block';
       banner.innerHTML = data.rubric_version
-        ? `<p class="card-sub" style="margin:0;">Every applicant is scored and shortlisted automatically on apply, against <strong>rubric v${data.rubric_version}</strong> - no recruiter action required.</p>`
+        ? `<p class="card-sub" style="margin:0;">Every applicant is scored and shortlisted automatically on apply, against <strong>rubric v${data.rubric_version}</strong> — no recruiter action required.</p>`
         : `<p class="card-sub" style="margin:0;">
              This job has <strong>no approved rubric yet</strong>, so applicants are parked with only a semantic screening score
-             until one is approved - automated shortlisting begins immediately once it is.
-             <a href="job-detail.html?job_id=${encodeURIComponent(jobId)}">Draft and approve a rubric →</a>
+             until one is approved — automated shortlisting begins immediately once it is.
+             <a href="job-detail.html?job_id=${encodeURIComponent(jobId)}" style="text-decoration:underline; text-underline-offset:2px;">Draft and approve a rubric</a>
            </p>`;
 
       const rows = data.rows || [];
@@ -279,7 +252,7 @@
 
       renderFilteredApplicants();
     } catch (err) {
-      document.getElementById('applicantListContainer').innerHTML = `<p class="card-sub" style="color:var(--danger, #ef4444);">Could not load screening results: ${escapeHtml(err.message)}</p>`;
+      document.getElementById('applicantListContainer').innerHTML = `<p class="card-sub" style="color:var(--danger-text);">Could not load screening results: ${escapeHtml(err.message)}</p>`;
     }
   }
 
@@ -347,7 +320,7 @@
 
       let skillsHtml = (r.skills || []).map(s => `<span class="tag">${escapeHtml(s)}</span>`).join(' ');
       let workHtml = (r.work_experience || []).map(w => `
-        <div style="margin-bottom:0.75rem; padding-bottom:0.5rem; border-bottom:1px solid var(--border, rgba(0,0,0,0.06));">
+        <div style="margin-bottom:0.75rem; padding-bottom:0.5rem; border-bottom:1px solid var(--surface-border);">
           <div style="font-weight:600;">${escapeHtml(w.role || 'Role')} · ${escapeHtml(w.company || 'Company')}</div>
           <div class="card-sub" style="font-size:12px;">${escapeHtml(w.duration || '')} ${w.location ? '· ' + escapeHtml(w.location) : ''}</div>
           <p style="font-size:0.85rem; margin:0.3rem 0 0;">${escapeHtml(w.description || '')}</p>
@@ -362,36 +335,36 @@
 
       body.innerHTML = `
         <div style="margin-bottom:1rem;">
-          <h4 style="font-size:11px; font-family:var(--font-mono); text-transform:uppercase; color:var(--text-muted); margin-bottom:0.35rem;">Overview</h4>
+          <h4 style="font-size:11px; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-3); margin-bottom:0.35rem;">Overview</h4>
           <div><strong>Total Experience:</strong> ${r.total_experience_years != null ? r.total_experience_years + ' years' : 'Not specified'}</div>
         </div>
 
         <div style="margin-bottom:1rem;">
-          <h4 style="font-size:11px; font-family:var(--font-mono); text-transform:uppercase; color:var(--text-muted); margin-bottom:0.35rem;">Extracted Skills</h4>
+          <h4 style="font-size:11px; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-3); margin-bottom:0.35rem;">Extracted Skills</h4>
           <div style="display:flex; gap:0.3rem; flex-wrap:wrap;">${skillsHtml || '<span class="card-sub">No skills detected.</span>'}</div>
         </div>
 
         <div style="margin-bottom:1rem;">
-          <h4 style="font-size:11px; font-family:var(--font-mono); text-transform:uppercase; color:var(--text-muted); margin-bottom:0.35rem;">Work History</h4>
+          <h4 style="font-size:11px; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-3); margin-bottom:0.35rem;">Work History</h4>
           ${workHtml}
         </div>
 
         <div style="margin-bottom:1rem;">
-          <h4 style="font-size:11px; font-family:var(--font-mono); text-transform:uppercase; color:var(--text-muted); margin-bottom:0.35rem;">Education</h4>
+          <h4 style="font-size:11px; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-3); margin-bottom:0.35rem;">Education</h4>
           ${eduHtml}
         </div>
 
         ${r.raw_text ? `
           <div style="margin-top:1.25rem;">
             <details>
-              <summary style="font-family:var(--font-mono); font-size:11px; text-transform:uppercase; color:var(--text-muted); cursor:pointer;">Raw Resume Text</summary>
-              <pre style="background:var(--bg); border:1px solid var(--surface-border); border-radius:var(--radius); padding:0.75rem; font-size:11.5px; white-space:pre-wrap; max-height:220px; overflow-y:auto; margin-top:0.4rem;">${escapeHtml(r.raw_text)}</pre>
+              <summary style="font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-3); cursor:pointer;">Raw Resume Text</summary>
+              <pre style="background:var(--canvas); border:1px solid var(--surface-border); border-radius:var(--radius); padding:0.75rem; font-size:11.5px; white-space:pre-wrap; max-height:220px; overflow-y:auto; margin-top:0.4rem;">${escapeHtml(r.raw_text)}</pre>
             </details>
           </div>
         ` : ''}
       `;
     } catch (err) {
-      body.innerHTML = `<p class="card-sub" style="color:var(--danger, #ef4444);">Could not load candidate details: ${escapeHtml(err.message)}</p>`;
+      body.innerHTML = `<p class="card-sub" style="color:var(--danger-text);">Could not load candidate details: ${escapeHtml(err.message)}</p>`;
     }
   }
 

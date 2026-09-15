@@ -360,19 +360,7 @@ function renderNavbar(activePage = '') {
   navContainer.innerHTML = `
     <header class="navbar">
       <div class="brand-logo" onclick="window.location.href='index.html'">
-        <svg class="brand-mark" viewBox="0 0 120 120" aria-hidden="true">
-          <rect x="56" y="6" width="8" height="34" fill="var(--primary)"></rect>
-          <rect x="56" y="80" width="8" height="34" fill="var(--primary)"></rect>
-          <rect x="6" y="56" width="34" height="8" fill="var(--primary)"></rect>
-          <rect x="80" y="56" width="34" height="8" fill="var(--primary)"></rect>
-          <rect x="30" y="30" width="8" height="8" fill="var(--primary)"></rect>
-          <rect x="82" y="30" width="8" height="8" fill="var(--primary)"></rect>
-          <rect x="30" y="82" width="8" height="8" fill="var(--primary)"></rect>
-          <rect x="82" y="82" width="8" height="8" fill="var(--primary)"></rect>
-          <rect x="44" y="44" width="8" height="32" fill="var(--bg)"></rect>
-          <rect x="68" y="44" width="8" height="32" fill="var(--bg)"></rect>
-          <rect x="52" y="56" width="16" height="8" fill="var(--bg)"></rect>
-        </svg>
+        <img class="brand-mark" src="assets/openhire.svg" alt="OpenHire">
         OpenHire
       </div>
 
@@ -465,5 +453,60 @@ function toggleNavMenu(event) {
   };
   document.addEventListener('click', closeOnOutsideClick);
   document.addEventListener('keydown', closeOnEscape);
+}
+
+/**
+ * Scroll-entry reveals. `transform` + `opacity` only, run through a single
+ * IntersectionObserver (never a scroll listener). Children of a
+ * `.reveal-stagger` container inherit a `--i` index used for the 60ms
+ * cascade delay in CSS. Respects prefers-reduced-motion by revealing
+ * everything instantly.
+ */
+function initReveal() {
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!('IntersectionObserver' in window)) {
+    document.querySelectorAll('.reveal').forEach((el) => el.classList.add('visible'));
+    return;
+  }
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+  const seen = new WeakSet();
+  const observeEl = (el) => {
+    if (seen.has(el) || el.classList.contains('visible')) return;
+    seen.add(el);
+    const stagger = el.parentElement && el.parentElement.classList.contains('reveal-stagger');
+    if (stagger) {
+      const idx = Array.prototype.indexOf.call(el.parentElement.children, el);
+      el.style.setProperty('--i', String(idx));
+    } else if (el.dataset.revealDelay) {
+      el.style.setProperty('--i', el.dataset.revealDelay);
+    }
+    io.observe(el);
+  };
+  if (reduce) {
+    document.querySelectorAll('.reveal').forEach((el) => el.classList.add('visible'));
+    return;
+  }
+  document.querySelectorAll('.reveal').forEach(observeEl);
+  new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      for (const node of mutation.addedNodes) {
+        if (node.nodeType !== 1) continue;
+        if (node.classList && node.classList.contains('reveal')) observeEl(node);
+        if (node.querySelectorAll) node.querySelectorAll('.reveal').forEach(observeEl);
+      }
+    }
+  }).observe(document.body, { childList: true, subtree: true });
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initReveal);
+} else {
+  initReveal();
 }
 

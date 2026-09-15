@@ -6,7 +6,8 @@
 <title>OpenHire — Apply</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -14,13 +15,13 @@
 <div id="impersonationBanner"></div>
 
 <main class="container">
-  <div style="max-width: 680px; margin: 1.5rem auto;" class="card">
+  <div style="max-width: 680px; margin: 0 auto;" class="card reveal">
     <div class="card-header">
       <div>
         <h2 class="card-title">Apply with Resume</h2>
-        <p class="card-sub" id="applyTargetJob">Target Role: —</p>
+        <p class="card-sub" id="applyTargetJob" style="font-family:var(--font-mono); font-size:12px;">Target Role: —</p>
       </div>
-      <button class="btn-outline" onclick="window.history.back()">Back</button>
+      <button class="btn-outline" onclick="window.history.back()"><i class="ph-bold ph-arrow-left"></i>Back</button>
     </div>
 
     <div class="form-group" style="margin-top:1.25rem;">
@@ -30,25 +31,25 @@
 
     <div class="form-group">
       <label class="form-label">Upload Resume (PDF or DOCX)</label>
-      <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:0.4rem;">
-        Uploading extracts your resume's text and runs it through <code>ResumeParserAgent</code> automatically - review the result below before submitting. Only .pdf and .docx are supported (not legacy .doc).
+      <p style="font-size:0.8rem; color:var(--ink-3); margin-bottom:0.4rem;">
+        Uploading extracts your resume's text and runs it through <code>ResumeParserAgent</code> automatically — review the result below before submitting. Only .pdf and .docx are supported (not legacy .doc).
       </p>
       <div style="display:flex; gap:0.5rem;">
-        <input type="file" id="resumeFile" class="form-control" accept=".pdf,.docx" style="flex:1;">
-        <button class="btn-secondary" id="btnParseFile" onclick="handleResumeFileUpload()">Parse File</button>
+        <input type="file" id="resumeFile" class="form-control" accept=".pdf,.docx" style="flex:1; padding-top:0.45rem;">
+        <button class="btn-secondary" id="btnParseFile" onclick="handleResumeFileUpload()"><i class="ph-bold ph-file-arrows"></i>Parse File</button>
       </div>
-      <div id="resumePreview" style="display:none; margin-top:0.75rem; padding:0.75rem 0.9rem; background:var(--bg); border:1px solid var(--surface-border); border-radius:var(--radius); font-size:0.85rem;"></div>
+      <div id="resumePreview" style="display:none; margin-top:0.75rem; padding:0.75rem 0.9rem; background:var(--canvas); border:1px solid var(--surface-border); border-radius:var(--radius); font-size:0.85rem;"></div>
     </div>
 
     <div class="form-group">
       <label class="form-label">Resume / CV Plaintext</label>
-      <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:0.4rem;">
-        Uploading a file above fills this in automatically - review and edit it here before submitting, or paste your resume text directly.
+      <p style="font-size:0.8rem; color:var(--ink-3); margin-bottom:0.4rem;">
+        Uploading a file above fills this in automatically — review and edit it here before submitting, or paste your resume text directly.
       </p>
       <textarea id="resumeText" class="form-control" rows="9" placeholder="EXPERIENCE&#10;Software Engineer @ Acme Corp...&#10;&#10;SKILLS&#10;Python, FastAPI, Distributed Caching, PostgreSQL, Docker..."></textarea>
     </div>
 
-    <button class="btn-primary" id="btnApply" style="width:100%; margin-top:0.5rem;" onclick="handleApplicationSubmit()">Submit Resume & Match Fit</button>
+    <button class="btn-primary" id="btnApply" style="width:100%; margin-top:0.5rem;" onclick="handleApplicationSubmit()"><i class="ph-bold ph-paper-plane-tilt"></i>Submit Resume & Match Fit</button>
   </div>
 </main>
 
@@ -102,7 +103,7 @@
       const previewEl = document.getElementById('resumePreview');
       previewEl.style.display = 'block';
       previewEl.innerHTML = `
-        <div style="font-family:var(--font-mono); font-size:11px; text-transform:uppercase; color:var(--text-muted); margin-bottom:0.4rem;">Extracted from ${r.source_format ? r.source_format.toUpperCase() : 'document'}${result.used_fallback ? ' (fallback parser)' : ''}</div>
+        <div style="font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-3); margin-bottom:0.4rem;">Extracted from ${r.source_format ? r.source_format.toUpperCase() : 'document'}${result.used_fallback ? ' (fallback parser)' : ''}</div>
         <div style="margin-bottom:0.3rem;"><strong>Contact:</strong> ${r.email || '—'} ${r.phone ? '· ' + r.phone : ''}</div>
         <div style="margin-bottom:0.3rem;"><strong>Experience:</strong> ${r.total_experience_years != null ? r.total_experience_years + ' years' : 'not detected'}</div>
         <div style="margin-bottom:0.3rem;"><strong>Education:</strong> ${r.education.length ? r.education.map(e => `${e.degree} · ${e.institution}`).join('; ') : 'not detected'}</div>
@@ -170,32 +171,32 @@
       if (isShortlisted) {
         cardEl.innerHTML = `
           <div style="text-align:center; padding:1.5rem 0.5rem;">
-            <div style="font-size:3rem; margin-bottom:0.75rem;">🎉</div>
-            <h2 style="font-weight:700; color:var(--text-main); margin-bottom:0.5rem;">Resume Shortlisted!</h2>
+            <div class="result-icon result-icon-success"><i class="ph-bold ph-check" aria-hidden="true"></i></div>
+            <h2 style="font-family:var(--font-serif); font-weight:400; font-size:1.9rem; color:var(--ink); margin-bottom:0.5rem;">Resume Shortlisted</h2>
             <p class="card-sub" style="font-size:1rem; margin-bottom:1.25rem;">
               Congratulations <strong>${escapeHtml(name)}</strong>, your qualifications have been automatically verified and shortlisted for <strong>${escapeHtml(jobId)}</strong>.
             </p>
 
-            <div style="background:var(--bg); border:1px solid var(--surface-border); border-radius:var(--radius); padding:1.25rem; margin-bottom:1.5rem; text-align:left;">
+            <div style="background:var(--canvas); border:1px solid var(--surface-border); border-radius:var(--radius); padding:1.25rem; margin-bottom:1.5rem; text-align:left;">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
                 <span style="font-weight:600;">Match Evaluation Score</span>
                 <span class="score-pill high" style="font-size:0.9rem;">${displayPct !== null ? displayPct + '%' : 'Qualified'}</span>
               </div>
-              <p style="font-size:0.85rem; color:var(--text-muted); margin:0;">
+              <p style="font-size:0.85rem; color:var(--ink-3); margin:0;">
                 ${escapeHtml(ourApplication.matching_score && ourApplication.matching_score.explanation || 'Strong alignment with role competencies and requirements.')}
               </p>
             </div>
 
-            <div style="background:var(--primary-subtle, #eff6ff); border:1px solid rgba(59,130,246,0.2); border-radius:var(--radius); padding:1rem; margin-bottom:1.5rem; text-align:left;">
-              <strong style="color:var(--primary); font-size:0.9rem;">🎙️ On-Demand AI Voice Interview</strong>
-              <p style="font-size:0.85rem; color:var(--text-main); margin:0.3rem 0 0;">
+            <div style="background:var(--success-subtle); border:1px solid var(--success-border); border-left:3px solid var(--success); border-radius:var(--radius); padding:1rem; margin-bottom:1.5rem; text-align:left;">
+              <strong style="color:var(--success-text); font-size:0.9rem;"><i class="ph-bold ph-microphone" aria-hidden="true"></i> On-Demand AI Voice Interview</strong>
+              <p style="font-size:0.85rem; color:var(--ink-2); margin:0.3rem 0 0;">
                 You can give your structured interview <strong>right now</strong>, or <strong>whenever you want</strong> by logging into your Candidate Dashboard.
               </p>
             </div>
 
             <div style="display:flex; gap:0.75rem; flex-direction:column;">
-              <button class="btn-primary" style="padding:0.75rem; font-size:1rem;" onclick="startInterviewNow('${ourApplication.application_id}')">
-                🎙️ Start Interview Now →
+              <button class="btn-primary btn-lg" onclick="startInterviewNow('${ourApplication.application_id}')">
+                <i class="ph-bold ph-microphone" aria-hidden="true"></i>Start Interview Now
               </button>
               <button class="btn-outline" style="padding:0.6rem; font-size:0.9rem;" onclick="window.location.href='candidate.html'">
                 Go to Candidate Dashboard (Take Later)
@@ -206,17 +207,17 @@
       } else if (isRejected) {
         cardEl.innerHTML = `
           <div style="text-align:center; padding:1.5rem 0.5rem;">
-            <div style="font-size:2.5rem; margin-bottom:0.75rem;">📋</div>
-            <h2 style="font-weight:700; color:var(--text-main); margin-bottom:0.5rem;">Application Evaluated</h2>
+            <div class="result-icon"><i class="ph-bold ph-file-x" aria-hidden="true"></i></div>
+            <h2 style="font-family:var(--font-serif); font-weight:400; font-size:1.9rem; color:var(--ink); margin-bottom:0.5rem;">Application Evaluated</h2>
             <p class="card-sub" style="font-size:0.95rem; margin-bottom:1.25rem;">
               Thank you for applying to <strong>${escapeHtml(jobId)}</strong>.
             </p>
-            <div style="background:var(--bg); border:1px solid var(--surface-border); border-radius:var(--radius); padding:1rem; margin-bottom:1.5rem; text-align:left;">
+            <div style="background:var(--canvas); border:1px solid var(--surface-border); border-radius:var(--radius); padding:1rem; margin-bottom:1.5rem; text-align:left;">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
                 <span style="font-weight:600;">Match Score</span>
                 <span class="score-pill low">${displayPct !== null ? displayPct + '%' : 'Under threshold'}</span>
               </div>
-              <p style="font-size:0.85rem; color:var(--text-muted); margin:0;">
+              <p style="font-size:0.85rem; color:var(--ink-3); margin:0;">
                 ${escapeHtml(ourApplication.matching_score && ourApplication.matching_score.explanation || 'Your profile did not meet the auto-shortlisting criteria for this specific role at this time.')}
               </p>
             </div>
@@ -228,17 +229,17 @@
       } else {
         cardEl.innerHTML = `
           <div style="text-align:center; padding:1.5rem 0.5rem;">
-            <div style="font-size:2.5rem; margin-bottom:0.75rem;">⏳</div>
-            <h2 style="font-weight:700; color:var(--text-main); margin-bottom:0.5rem;">Application Under Review</h2>
+            <div class="result-icon"><i class="ph-bold ph-hourglass" aria-hidden="true"></i></div>
+            <h2 style="font-family:var(--font-serif); font-weight:400; font-size:1.9rem; color:var(--ink); margin-bottom:0.5rem;">Application Under Review</h2>
             <p class="card-sub" style="font-size:0.95rem; margin-bottom:1.25rem;">
               Your resume has been parsed and queued for review for <strong>${escapeHtml(jobId)}</strong>.
             </p>
-            <div style="background:var(--bg); border:1px solid var(--surface-border); border-radius:var(--radius); padding:1rem; margin-bottom:1.5rem; text-align:left;">
+            <div style="background:var(--canvas); border:1px solid var(--surface-border); border-radius:var(--radius); padding:1rem; margin-bottom:1.5rem; text-align:left;">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
                 <span style="font-weight:600;">Status</span>
                 <span class="tag">${escapeHtml(ourApplication.status.replace(/_/g, ' '))}</span>
               </div>
-              <p style="font-size:0.85rem; color:var(--text-muted); margin:0;">
+              <p style="font-size:0.85rem; color:var(--ink-3); margin:0;">
                 ${displayPct !== null ? `Match score: ${displayPct}%. ` : ''}A recruiter will review your application. You will be able to launch your interview from your dashboard once approved.
               </p>
             </div>

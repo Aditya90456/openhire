@@ -6,47 +6,29 @@
 <title>OpenHire — Candidate Leaderboard & Rankings</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css">
 <link rel="stylesheet" href="css/style.css">
-<style>
-  .stats-strip {
-    display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));
-    background:var(--surface);
-    border:1px solid var(--surface-border);
-    border-radius:var(--radius-lg);
-    margin-bottom:1.5rem;
-    overflow:hidden;
-  }
-  .stat-cell {
-    padding:1rem 1.25rem;
-    border-right:1px solid var(--surface-border);
-  }
-  .stat-cell:last-child { border-right:none; }
-  .stat-num { font-size:1.5rem; font-weight:700; color:var(--text-main); font-family:var(--font-mono); line-height:1.1; }
-  .stat-label { font-size:0.72rem; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted); margin-top:0.3rem; }
-</style>
 </head>
 <body>
 <div id="navbarContainer"></div>
 <div id="impersonationBanner"></div>
 
 <main class="container">
-  <div class="card-header" style="margin-bottom:1.75rem; align-items:flex-start;">
-    <div>
-      <h2 class="card-title">Candidate Evaluation Leaderboard</h2>
-      <p class="card-sub" id="leaderboardMeta">Rankings and multi-agent interview evaluations scored by <code>LeaderboardAgent</code>.</p>
-    </div>
-    <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-      <button class="btn-secondary" onclick="reMatchShortlist()">Run Matcher</button>
-      <button class="btn-outline" onclick="goToScreening()">All Resumes</button>
-      <button class="btn-outline" onclick="window.history.back()">Back</button>
+  <div class="page-head reveal">
+    <div class="eyebrow">workspace / recruiter</div>
+    <h1 class="page-title">Candidate Leaderboard</h1>
+    <p class="card-sub" id="leaderboardMeta">Rankings and multi-agent interview evaluations scored by <code>LeaderboardAgent</code>.</p>
+    <div class="page-actions" style="margin-top:1.25rem;">
+      <button class="btn-secondary" onclick="reMatchShortlist()"><i class="ph-bold ph-lightning"></i>Run Matcher</button>
+      <button class="btn-outline" onclick="goToScreening()"><i class="ph-bold ph-file-text"></i>All Resumes</button>
+      <button class="btn-outline" onclick="window.history.back()"><i class="ph-bold ph-arrow-left"></i>Back</button>
     </div>
   </div>
 
-  <div class="stats-strip" id="leaderboardStats">
+  <div class="stats-strip reveal" id="leaderboardStats">
     <div class="stat-cell">
-      <div class="stat-num" id="statOpenings" style="color:var(--primary);">1</div>
+      <div class="stat-num" id="statOpenings">1</div>
       <div class="stat-label">Openings</div>
     </div>
     <div class="stat-cell">
@@ -58,7 +40,7 @@
       <div class="stat-label">Evaluated</div>
     </div>
     <div class="stat-cell">
-      <div class="stat-num" id="statIncomplete" style="color:var(--primary);">0</div>
+      <div class="stat-num" id="statIncomplete">0</div>
       <div class="stat-label">In Progress</div>
     </div>
     <div class="stat-cell">
@@ -67,17 +49,17 @@
     </div>
   </div>
 
-  <div class="card" id="selectionSummaryCard" style="margin-bottom:1.5rem; display:none; background:var(--success-subtle); border:1px solid rgba(16,185,129,0.3);">
+  <div class="card reveal" id="selectionSummaryCard" style="margin-bottom:1.5rem; display:none; background:var(--success-subtle); border:1px solid var(--success-border); border-left:3px solid var(--success);">
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
       <div>
         <h4 style="font-weight:600; color:var(--success-text); margin:0 0 0.2rem; font-size:0.95rem;">Hiring Selection Result</h4>
-        <p id="selectionSummaryText" style="margin:0; font-size:0.85rem; color:var(--text-muted);"></p>
+        <p id="selectionSummaryText" style="margin:0; font-size:0.85rem; color:var(--ink-3);"></p>
       </div>
-      <span class="tag" style="color:var(--success-text); border-color:rgba(16,185,129,0.3);">AI Evaluated</span>
+      <span class="chip chip-success"><i class="ph-bold ph-magic-wand" style="margin-right:0.3rem;"></i>AI Evaluated</span>
     </div>
   </div>
 
-  <div class="card">
+  <div class="card reveal">
     <div style="display:flex; justify-content:space-between; align-items:center; gap:0.75rem; flex-wrap:wrap; margin-bottom:1rem;">
       <h3 class="card-title" style="font-size:1.05rem; margin:0;">Ranked Candidates</h3>
       <div style="min-width:200px;">
@@ -166,7 +148,7 @@
 
       renderLeaderboardRows();
     } catch (err) {
-      tbody.innerHTML = `<tr><td colspan="7" class="card-sub" style="color:var(--danger, #ef4444);">Could not load leaderboard: ${escapeHtml(err.message)}</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" class="card-sub" style="color:var(--danger-text);">Could not load leaderboard: ${escapeHtml(err.message)}</td></tr>`;
     }
   }
 
@@ -186,24 +168,24 @@
       const isSelected = c.is_selected;
       let selectionBadge;
       if (isSelected) {
-        selectionBadge = `<span class="tag" style="background:var(--success-subtle); color:var(--success-text); border-color:rgba(16,185,129,0.3); font-weight:600;">Selected</span>`;
+        selectionBadge = `<span class="chip chip-success">Selected</span>`;
       } else {
-        selectionBadge = `<span class="tag">Waitlisted</span>`;
+        selectionBadge = `<span class="chip">Waitlisted</span>`;
       }
 
       return `
-      <tr style="${isSelected ? 'background:rgba(16,185,129,0.03);' : ''}">
-        <td style="font-family:var(--font-mono); font-weight:700; color:${isSelected ? 'var(--success-text)' : 'var(--primary)'};">#${c.rank}</td>
+      <tr style="${isSelected ? 'background:var(--success-subtle);' : ''}">
+        <td style="font-family:var(--font-mono); font-weight:500; color:${isSelected ? 'var(--success-text)' : 'var(--ink)'};">#${c.rank}</td>
         <td>
-          <strong style="color:var(--text-main); font-size:0.95rem;">${escapeHtml(c.candidate_name)}</strong>
+          <strong style="color:var(--ink); font-size:0.95rem;">${escapeHtml(c.candidate_name)}</strong>
           <div class="card-sub" style="font-size:11px; font-family:var(--font-mono);">${escapeHtml(c.candidate_id)}</div>
         </td>
         <td><span class="score-pill ${c.job_fit_score >= 7 ? 'high' : 'med'}">${(c.job_fit_score || 0).toFixed(1)}/10</span></td>
-        <td><span class="score-pill high" style="font-weight:700;">${(c.weighted_score || 0).toFixed(1)}/10</span></td>
+        <td><span class="score-pill high" style="font-weight:500;">${(c.weighted_score || 0).toFixed(1)}/10</span></td>
         <td>${selectionBadge}</td>
-        <td><span class="tag" style="${(c.has_integrity_issues || c.has_bias_concerns) ? 'color:var(--warning-text); border-color:rgba(245,158,11,0.3);' : 'color:var(--text-faint);'}">${(c.has_integrity_issues || c.has_bias_concerns) ? 'Flagged' : 'Clean'}</span></td>
+        <td><span class="tag" style="${(c.has_integrity_issues || c.has_bias_concerns) ? 'color:var(--warning-text); border-color:var(--warning-border);' : 'color:var(--ink-3);'}">${(c.has_integrity_issues || c.has_bias_concerns) ? 'Flagged' : 'Clean'}</span></td>
         <td>
-          <button class="btn-primary" style="padding:0.3rem 0.9rem; font-size:12px;" onclick="window.location.href='report.html?job_id=${encodeURIComponent(jobId)}&candidate_id=${encodeURIComponent(c.candidate_id)}'">
+          <button class="btn-primary btn-sm" onclick="window.location.href='report.html?job_id=${encodeURIComponent(jobId)}&candidate_id=${encodeURIComponent(c.candidate_id)}'">
             Report
           </button>
         </td>
@@ -215,13 +197,13 @@
       <tr style="opacity:0.8;">
         <td>—</td>
         <td>
-          <strong style="color:var(--text-main);">${escapeHtml(candidateId)}</strong>
+          <strong style="color:var(--ink);">${escapeHtml(candidateId)}</strong>
           <div class="card-sub" style="font-size:11px;">Shortlisted Candidate</div>
         </td>
         <td><span class="tag">Shortlisted</span></td>
         <td colspan="3" class="card-sub" style="font-style:italic;">Eligible for on-demand interview — waiting for candidate to complete</td>
         <td>
-          <button class="btn-outline" style="padding:0.25rem 0.6rem; font-size:11.5px;" onclick="goToScreening()">
+          <button class="btn-sm btn-outline" onclick="goToScreening()">
             View Resume
           </button>
         </td>
