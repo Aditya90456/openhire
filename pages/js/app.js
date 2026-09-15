@@ -467,3 +467,43 @@ function toggleNavMenu(event) {
   document.addEventListener('keydown', closeOnEscape);
 }
 
+/**
+ * Scroll-entry reveals. `transform` + `opacity` only, run through a single
+ * IntersectionObserver (never a scroll listener). Children of a
+ * `.reveal-stagger` container inherit a `--i` index used for the 60ms
+ * cascade delay in CSS. Respects prefers-reduced-motion by revealing
+ * everything instantly.
+ */
+function initReveal() {
+  const els = document.querySelectorAll('.reveal');
+  if (!els.length) return;
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!('IntersectionObserver' in window) || reduce) {
+    els.forEach((el) => el.classList.add('visible'));
+    return;
+  }
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+  els.forEach((el) => {
+    const stagger = el.parentElement && el.parentElement.classList.contains('reveal-stagger');
+    if (stagger) {
+      const idx = Array.prototype.indexOf.call(el.parentElement.children, el);
+      el.style.setProperty('--i', String(idx));
+    } else if (el.dataset.revealDelay) {
+      el.style.setProperty('--i', el.dataset.revealDelay);
+    }
+    io.observe(el);
+  });
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initReveal);
+} else {
+  initReveal();
+}
+

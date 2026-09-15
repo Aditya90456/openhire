@@ -6,7 +6,8 @@
 <title>OpenHire — Profile</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -14,26 +15,25 @@
 <div id="impersonationBanner"></div>
 
 <main class="container">
-  <div class="card-header" style="margin-bottom:1.5rem;">
-    <div>
-      <h2 class="card-title">Your Profile</h2>
-      <p class="card-sub">Account details, role information, and security settings.</p>
-    </div>
+  <div class="page-head reveal">
+    <div class="eyebrow">account / settings</div>
+    <h1 class="page-title">Your Profile</h1>
+    <p class="card-sub">Account details, role information, and security settings.</p>
   </div>
 
-  <div class="card">
+  <div class="card reveal">
     <div class="profile-header-row">
       <div class="profile-avatar" id="profileAvatar">?</div>
       <div>
         <h3 class="card-title" id="profileName" style="font-size:1.1rem;">—</h3>
         <p class="card-sub" id="profileEmail" style="margin:0.15rem 0;">—</p>
-        <span class="tag" id="profileRoleTag">—</span>
+        <span class="chip" id="profileRoleTag">—</span>
         <span class="card-sub" id="profileMemberSince" style="margin-left:0.5rem;"></span>
       </div>
     </div>
   </div>
 
-  <div class="card">
+  <div class="card reveal">
     <div class="card-header">
       <h3 class="card-title" style="font-size:1.05rem;">Account Details</h3>
     </div>
@@ -63,11 +63,11 @@
     </form>
   </div>
 
-  <div class="card" id="roleCard" hidden>
+  <div class="card reveal" id="roleCard" hidden>
     <!-- Populated by JS: recruiter company form, or candidate read-only resume summary. -->
   </div>
 
-  <div class="card">
+  <div class="card reveal">
     <div class="card-header">
       <h3 class="card-title" style="font-size:1.05rem;">Security</h3>
     </div>
@@ -85,7 +85,7 @@
     </form>
   </div>
 
-  <div class="card" id="api-keys">
+  <div class="card reveal" id="api-keys">
     <div class="card-header">
       <h3 class="card-title" style="font-size:1.05rem;">API Keys</h3>
     </div>

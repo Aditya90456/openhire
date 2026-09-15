@@ -6,62 +6,31 @@
 <title>OpenHire — OpenBox</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css">
 <link rel="stylesheet" href="css/style.css">
-<style>
-  .stats-strip {
-    display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));
-    background:var(--surface);
-    border:1px solid var(--surface-border);
-    border-radius:var(--radius-lg);
-    margin-bottom:1.5rem;
-    overflow:hidden;
-  }
-  .stat-cell { padding:1rem 1.25rem; border-right:1px solid var(--surface-border); }
-  .stat-cell:last-child { border-right:none; }
-  .stat-num { font-size:1.5rem; font-weight:700; color:var(--text-main); font-family:var(--font-mono); line-height:1.1; }
-  .stat-label { font-size:0.72rem; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted); margin-top:0.3rem; }
-
-  .filter-tabs { display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1rem; }
-  .filter-tab { background:var(--surface); border:1px solid var(--surface-border); border-radius:var(--radius-pill); padding:0.4rem 0.9rem; font-size:12.5px; font-weight:500; cursor:pointer; color:var(--text-muted); transition:all 0.15s; }
-  .filter-tab:hover { color:var(--text-main); border-color:var(--primary); }
-  .filter-tab.active { background:var(--primary); color:#fff; border-color:var(--primary); }
-
-  .bug-card { padding:1.1rem 1.25rem; }
-  .bug-card + .bug-card { margin-top:0.75rem; }
-  .bug-title-row { display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap; margin-bottom:0.35rem; }
-  .bug-title { font-weight:600; font-size:0.98rem; color:var(--text-main); }
-  .bug-desc { color:var(--text-muted); font-size:0.87rem; line-height:1.5; margin-bottom:0.6rem; white-space:pre-wrap; }
-  .bug-meta { display:flex; align-items:center; justify-content:space-between; gap:0.75rem; flex-wrap:wrap; }
-  .bug-meta-left { font-family:var(--font-mono); font-size:11px; color:var(--text-faint); }
-
-  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.6); display:none; align-items:center; justify-content:center; z-index:1000; padding:1rem; }
-  .modal-box { background:var(--surface); border:1px solid var(--surface-border); border-radius:var(--radius-lg); max-width:520px; width:100%; max-height:90vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 20px 25px -5px rgba(0,0,0,0.4); }
-  .modal-header { padding:1rem 1.25rem; border-bottom:1px solid var(--surface-border); display:flex; justify-content:space-between; align-items:center; }
-  .modal-body { padding:1.25rem; overflow-y:auto; flex:1; }
-</style>
 </head>
 <body>
 <div id="navbarContainer"></div>
 <div id="impersonationBanner"></div>
 
 <main class="container">
-  <div class="card-header" style="margin-bottom:1.75rem; align-items:flex-start;">
-    <div>
-      <h2 class="card-title">OpenBox</h2>
-      <p class="card-sub">Bugs reported by the community, tracked in the open.</p>
+  <div class="page-head reveal">
+    <div class="eyebrow">community / tracking</div>
+    <h1 class="page-title">OpenBox</h1>
+    <p class="card-sub">Bugs reported by the community, tracked in the open.</p>
+    <div class="page-actions" style="margin-top:1.25rem;">
+      <button class="btn-primary" onclick="openReportModal()"><i class="ph-bold ph-bug"></i>Report a Bug</button>
     </div>
-    <button class="btn-primary" onclick="openReportModal()">Report a Bug</button>
   </div>
 
-  <div class="stats-strip" id="bugStats">
+  <div class="stats-strip reveal" id="bugStats">
     <div class="stat-cell">
       <div class="stat-num" id="statOpen" style="color:var(--danger-text);">0</div>
       <div class="stat-label">Open</div>
     </div>
     <div class="stat-cell">
-      <div class="stat-num" id="statInProgress" style="color:var(--primary);">0</div>
+      <div class="stat-num" id="statInProgress">0</div>
       <div class="stat-label">In Progress</div>
     </div>
     <div class="stat-cell">
@@ -74,7 +43,7 @@
     </div>
   </div>
 
-  <div class="filter-tabs" id="filterTabs">
+  <div class="filter-tabs reveal" id="filterTabs">
     <button class="filter-tab active" data-filter="all" onclick="setFilter('all')">All</button>
     <button class="filter-tab" data-filter="open" onclick="setFilter('open')">Open</button>
     <button class="filter-tab" data-filter="in_progress" onclick="setFilter('in_progress')">In Progress</button>
@@ -82,14 +51,14 @@
     <button class="filter-tab" data-filter="wont_fix" onclick="setFilter('wont_fix')">Won't Fix</button>
   </div>
 
-  <div id="bugList"></div>
+  <div id="bugList" class="reveal"></div>
 </main>
 
 <div class="modal-overlay" id="reportModal" onclick="closeReportModal(event)">
-  <div class="modal-box" onclick="event.stopPropagation()">
+  <div class="modal-box" style="max-width:520px;" onclick="event.stopPropagation()">
     <div class="modal-header">
       <h3 class="card-title" style="font-size:1rem; margin:0;">Report a Bug</h3>
-      <button class="btn-outline" style="padding:0.25rem 0.6rem; font-size:12px;" onclick="closeReportModal()">Close</button>
+      <button class="btn-ghost modal-close" onclick="closeReportModal()"><i class="ph-bold ph-x"></i><span style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);">Close</span></button>
     </div>
     <div class="modal-body">
       <div id="reportError" class="alert alert-danger" style="display:none; margin-bottom:1rem;"></div>
@@ -145,20 +114,20 @@
 
   function severityBadge(sev) {
     const styles = {
-      critical: 'color:var(--danger-text); border-color:rgba(239,68,68,0.3);',
-      high: 'color:var(--warning-text); border-color:rgba(245,158,11,0.3);',
-      medium: 'color:var(--primary); border-color:var(--primary-glow);',
-      low: 'color:var(--text-faint);',
+      critical: 'color:var(--danger-text); border-color:var(--danger-border);',
+      high: 'color:var(--warning-text); border-color:var(--warning-border);',
+      medium: 'color:var(--ink); border-color:var(--surface-border);',
+      low: 'color:var(--ink-4);',
     };
     return `<span class="tag" style="${styles[sev] || ''}">${SEVERITY_LABELS[sev] || sev}</span>`;
   }
 
   function statusBadge(status) {
     const styles = {
-      open: 'color:var(--danger-text); border-color:rgba(239,68,68,0.3);',
-      in_progress: 'color:var(--primary); border-color:var(--primary-glow);',
-      resolved: 'background:var(--success-subtle); color:var(--success-text); border-color:rgba(16,185,129,0.3);',
-      wont_fix: 'color:var(--text-faint);',
+      open: 'color:var(--danger-text); border-color:var(--danger-border);',
+      in_progress: 'color:var(--info-text); border-color:var(--info-border); background:var(--info-bg);',
+      resolved: 'background:var(--success-subtle); color:var(--success-text); border-color:var(--success-border);',
+      wont_fix: 'color:var(--ink-4);',
     };
     return `<span class="tag" style="${styles[status] || ''}">${STATUS_LABELS[status] || status}</span>`;
   }

@@ -6,11 +6,12 @@
 <title>OpenHire — Interview</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css">
 <link rel="stylesheet" href="css/style.css">
 <style>
   body {
-    background: var(--bg);
+    background: var(--canvas);
     overflow: hidden;
     margin: 0;
     padding: 0;
@@ -37,14 +38,31 @@
     position: absolute;
     top: 1.5rem;
     left: 1.5rem;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 600;
-    color: var(--text-main);
-    font-family: var(--font-sans);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-family: var(--font-mono);
+    color: var(--ink-3);
+    background: var(--surface);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-pill);
+    padding: 0.4rem 0.85rem;
   }
+  .interview-header .mark {
+    width: 20px;
+    height: 20px;
+    border-radius: var(--radius-sm);
+    background: var(--ink);
+    color: var(--surface);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .interview-header .mark svg { width: 12px; height: 12px; }
 
   .status-dot {
     width: 8px;
@@ -92,16 +110,16 @@
   .avatar svg { width: 56px; height: 56px; }
 
   .avatar.ai {
-    border-color: var(--primary-glow);
-    box-shadow: 0 0 32px var(--primary-subtle);
+    border-color: var(--ink);
+    box-shadow: 0 12px 40px rgba(17, 17, 17, 0.08);
   }
-  .avatar.ai svg { color: var(--primary); }
+  .avatar.ai svg { color: var(--ink); }
 
   .avatar.user {
-    border-color: rgba(16, 185, 129, 0.35);
-    box-shadow: 0 0 32px var(--success-subtle);
+    border-color: var(--success);
+    box-shadow: 0 12px 40px rgba(52, 101, 56, 0.12);
   }
-  .avatar.user svg { color: var(--success-text); }
+  .avatar.user svg { color: var(--success); }
 
   /* Speaking waves: two rings expanding outward from the avatar, staggered
      so a new ring launches every ~1s (2s duration, 1s delay on the 2nd). */
@@ -111,7 +129,7 @@
     position: absolute;
     inset: 0;
     border-radius: 50%;
-    border: 2px solid var(--wave-color, var(--primary));
+    border: 2px solid var(--wave-color, var(--ink));
     opacity: 0;
     pointer-events: none;
   }
@@ -120,8 +138,8 @@
     animation: wave-ring 2s cubic-bezier(0.2, 0.6, 0.4, 1) infinite;
   }
   .avatar.speaking::after { animation-delay: 1s; }
-  .avatar.ai { --wave-color: var(--primary); }
-  .avatar.user { --wave-color: var(--success-text); }
+  .avatar.ai { --wave-color: var(--ink); }
+  .avatar.user { --wave-color: var(--success); }
 
   @keyframes wave-ring {
     0% { transform: scale(1); opacity: 0.55; }
@@ -135,14 +153,15 @@
   .participant-name {
     font-size: 16px;
     font-weight: 600;
-    color: var(--text-main);
+    letter-spacing: -0.01em;
+    color: var(--ink);
     font-family: var(--font-sans);
     margin: 0;
   }
 
   .participant-status {
     font-size: 12px;
-    color: var(--text-muted);
+    color: var(--ink-3);
     margin-top: 0.25rem;
   }
 
@@ -166,7 +185,11 @@
   .call-btn {
     padding: 0.75rem 1.5rem;
     font-size: 14px;
+    min-height: 44px;
+    align-items: center;
+    gap: 0.4rem;
   }
+  .call-btn i { font-size: 1rem; }
 
   .btn-record {
     background: var(--success);
@@ -174,16 +197,16 @@
     border-color: var(--success);
   }
   .btn-record:hover:not(:disabled) {
-    background: #0d9c6f;
-    border-color: #0d9c6f;
+    background: #2c5730;
+    border-color: #2c5730;
   }
   .btn-record.recording {
     background: var(--danger);
     border-color: var(--danger);
   }
   .btn-record.recording:hover:not(:disabled) {
-    background: #dc2626;
-    border-color: #dc2626;
+    background: #872725;
+    border-color: #872725;
   }
 
   .question-bar {
@@ -197,11 +220,11 @@
     border: 1px solid var(--surface-border);
     padding: 1rem 1.5rem;
     border-radius: var(--radius-lg);
-    max-width: 600px;
+    max-width: 640px;
     text-align: center;
     font-size: 13px;
     font-family: var(--font-sans);
-    color: var(--text-muted);
+    color: var(--ink-2);
     line-height: 1.5;
   }
 
@@ -232,6 +255,7 @@
 
 <main>
   <div class="interview-header">
+    <span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="square"><path d="M4 19 L20 5"/><path d="M10 19 L20 9"/><path d="M4 13 L14 3"/></svg></span>
     <span class="status-dot"></span>
     <span>Live</span>
   </div>
@@ -262,8 +286,8 @@
 
   <div class="controls">
     <button id="micBtn" class="btn-record call-btn">Tap to speak</button>
-    <button class="btn-danger call-btn" id="endBtn" onclick="window.history.back()">End interview</button>
-    <button id="replayBtn" class="btn-secondary call-btn" style="display:none;">Tap to hear question</button>
+    <button class="call-btn btn-danger" id="endBtn"><i class="ph-bold ph-phone-disconnect" aria-hidden="true"></i>End interview</button>
+    <button id="replayBtn" class="call-btn btn-secondary" style="display:none;"><i class="ph-bold ph-speaker-high" aria-hidden="true"></i>Tap to hear question</button>
   </div>
 
   <div class="question-bar" id="questionBar" style="display:none;">
@@ -272,15 +296,16 @@
 </main>
 
 <div id="transcriptPanel" style="position:fixed; top:0; right:0; width:300px; height:100vh; background:var(--surface); border-left:1px solid var(--surface-border); padding:1.25rem 1rem; overflow-y:auto; scroll-behavior:smooth; box-sizing:border-box; z-index:20; font-family:var(--font-sans);">
-  <h3 style="color:var(--text-main); font-size:13px; text-transform:uppercase; letter-spacing:0.05em; font-weight:600; margin:0 0 1rem 0;">Transcript</h3>
+  <h3 style="color:var(--ink); font-family:var(--font-mono); font-size:12px; text-transform:uppercase; letter-spacing:0.05em; font-weight:500; margin:0 0 1rem 0;"><i class="ph-bold ph-chats-circle" style="margin-right:0.35rem;"></i>Transcript</h3>
   <div id="transcriptLog"></div>
 </div>
 
-<div id="startOverlay" style="position:fixed; inset:0; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1.5rem; z-index:100;">
-  <div style="color:var(--text-main); font-family:var(--font-sans); font-size:15px; text-align:center; max-width:400px; padding:0 1rem;">
+<div id="startOverlay" style="position:fixed; inset:0; background:var(--canvas); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1.5rem; z-index:100;">
+  <div class="result-icon" style="width:64px; height:64px; font-size:1.7rem;"><i class="ph-bold ph-microphone" aria-hidden="true"></i></div>
+  <div style="color:var(--ink-2); font-family:var(--font-sans); font-size:15px; text-align:center; max-width:400px; padding:0 1rem;">
     Click below to start — your browser blocks audio from playing automatically, so this gets things going.
   </div>
-  <button id="startBtn" class="btn-primary call-btn">Start Interview</button>
+  <button id="startBtn" class="btn-primary call-btn"><i class="ph-bold ph-play" aria-hidden="true"></i>Start Interview</button>
 </div>
 
 <script>
@@ -407,10 +432,10 @@ function addTranscriptEntry(speaker, text) {
   entry.style.marginBottom = '1rem';
   const label = document.createElement('div');
   label.textContent = speaker;
-  label.style.cssText = 'font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.25rem; font-family:var(--font-sans); color:' + (speaker === 'Interviewer' ? 'var(--primary)' : 'var(--success-text)');
+  label.style.cssText = 'font-size:11px; font-weight:500; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.25rem; font-family:var(--font-sans); color:' + (speaker === 'Interviewer' ? 'var(--ink)' : 'var(--success-text)');
   const body = document.createElement('div');
   body.textContent = text;
-  body.style.cssText = 'font-size:13px; font-family:var(--font-sans); color:var(--text-muted); line-height:1.4;';
+  body.style.cssText = 'font-size:13px; font-family:var(--font-sans); color:var(--ink-3); line-height:1.4;';
   entry.appendChild(label);
   entry.appendChild(body);
   log.appendChild(entry);

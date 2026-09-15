@@ -6,7 +6,9 @@
 <title>OpenHire — Candidate Hub</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -14,42 +16,42 @@
 <div id="impersonationBanner"></div>
 
 <main class="container">
-  <div class="card-header" style="margin-bottom:1.5rem;">
-    <div>
-      <h2 class="card-title">Candidate Dashboard</h2>
-      <p class="card-sub">Browse open drives, apply with your resume, and launch your voice interview.</p>
-    </div>
+  <div class="page-head reveal">
+    <div class="eyebrow">workspace / candidate</div>
+    <h1 class="page-title">Candidate Dashboard</h1>
+    <p class="page-sub">Browse open drives, apply with your resume, and launch your voice interview.</p>
   </div>
 
-  <div class="card">
+  <div class="card reveal">
     <div class="card-header">
-      <h3 class="card-title" style="font-size:1.05rem;">Practice Interview</h3>
+      <h3 class="card-title" style="font-size:1.15rem;">Practice Interview</h3>
+      <span class="chip chip-info">Self-serve</span>
     </div>
     <p class="card-sub" style="margin-top:0;">
-      Paste any job description to rehearse for it - same rubric-scored voice
+      Paste any job description to rehearse for it — same rubric-scored voice
       interview and report as a real application, just for practice. Only you
       (and platform admins) can see practice interviews.
     </p>
     <textarea id="practiceJdText" class="form-control" rows="5"
-      placeholder="Paste a job description here..." style="width:100%; margin-bottom:0.75rem;"></textarea>
-    <button class="btn-primary" id="practiceCreateBtn">Start practice interview</button>
+      placeholder="Paste a job description here..." style="width:100%; margin-bottom:0.75rem; margin-top:1rem;"></textarea>
+    <button class="btn-primary" id="practiceCreateBtn"><i class="ph-bold ph-microphone"></i>Start practice interview</button>
     <div class="form-status" id="practiceStatus"></div>
     <div id="practiceJobList" style="margin-top:1rem;"></div>
   </div>
 
-  <div class="card">
+  <div class="card reveal">
     <div class="card-header">
-      <h3 class="card-title" style="font-size:1.05rem;">Available Positions</h3>
-      <span class="tag">Active</span>
+      <h3 class="card-title" style="font-size:1.15rem;">Available Positions</h3>
+      <span class="chip chip-success">Active</span>
     </div>
     <div id="candidateJobList" class="grid-2" style="margin-top:0.25rem;">
       <!-- Dynamic list -->
     </div>
   </div>
 
-  <div class="card">
+  <div class="card reveal">
     <div class="card-header">
-      <h3 class="card-title" style="font-size:1.05rem;">My Applications</h3>
+      <h3 class="card-title" style="font-size:1.15rem;">My Applications</h3>
     </div>
     <div id="candidateApplicationsList">
       <!-- Applications list -->
@@ -72,21 +74,21 @@
     try {
       const jobs = await fetchJobs();
       listEl.innerHTML = jobs.length ? jobs.map(job => `
-        <div class="job-card" onclick="window.location.href='job-detail.html?job_id=${encodeURIComponent(job.job_id)}'">
-          <h4 style="font-weight:600; font-size:1rem; margin-bottom:0.35rem;">${job.title || job.job_id}</h4>
-          <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:0.75rem;">
+        <div class="job-card reveal" onclick="window.location.href='job-detail.html?job_id=${encodeURIComponent(job.job_id)}'">
+          <h4 style="font-weight:600; font-size:1rem; margin-bottom:0.35rem; letter-spacing:-0.01em;">${job.title || job.job_id}</h4>
+          <p style="font-size:0.85rem; color:var(--ink-3); margin-bottom:0.85rem; line-height:1.55;">
             ${(job.description || '').substring(0, 100)}...
           </p>
           <div style="display:flex; justify-content:space-between; align-items:center;">
             <span class="tag">${job.competencies.length} Skills</span>
-            <button class="btn-primary" style="padding:0.3rem 0.75rem; font-size:12px;" onclick="event.stopPropagation(); window.location.href='apply.html?job_id=${encodeURIComponent(job.job_id)}'">
-              Apply →
+            <button class="btn-sm btn-primary" onclick="event.stopPropagation(); window.location.href='apply.html?job_id=${encodeURIComponent(job.job_id)}'">
+              Apply<i class="ph-bold ph-arrow-right" style="font-size:0.9em;"></i>
             </button>
           </div>
         </div>
-      `).join('') : '<p class="card-sub">No open positions right now.</p>';
+      `).join('') : '<div class="empty-state"><div class="empty-icon"><i class="ph-bold ph-list"></i></div><div class="empty-title">No open positions</div><p>Check back when the next drive opens.</p></div>';
     } catch (err) {
-      listEl.innerHTML = `<p class="card-sub" style="color:var(--danger, #ef4444);">Could not load jobs: ${err.message}</p>`;
+      listEl.innerHTML = `<p class="card-sub" style="color:var(--danger-text);">Could not load jobs: ${err.message}</p>`;
     }
 
     const user = await resolveCandidateId();
@@ -102,8 +104,9 @@
         return;
       }
       appListEl.innerHTML = `
-        <div style="background:var(--primary-subtle, #eff6ff); border:1px solid rgba(59,130,246,0.2); border-radius:var(--radius); padding:0.75rem 1rem; margin-bottom:1rem; font-size:0.85rem; color:var(--text-main);">
-          💡 <strong>On-Demand AI Interviews:</strong> Shortlisted candidates can take their structured voice interview at any time. When ready, click <strong>Launch Interview</strong>.
+        <div style="background:var(--info-bg); border:1px solid rgba(31,108,159,0.18); border-radius:var(--radius); padding:0.8rem 1rem; margin-bottom:1rem; font-size:0.85rem; color:var(--info-text); display:flex; gap:0.6rem; align-items:flex-start;">
+          <i class="ph-fill ph-lightbulb" style="flex-shrink:0; font-size:1.1rem; margin-top:0.15rem;"></i>
+          <span><strong>On-demand AI interviews:</strong> Shortlisted candidates can take their structured voice interview at any time. When ready, click <strong>Launch Interview</strong>.</span>
         </div>
       ` + apps.map(app => {
         const rubricPct = app.matching_score && app.matching_score.match_score != null
@@ -113,29 +116,29 @@
         const matchPct = rubricPct !== null ? rubricPct : semanticPct;
         const matchLabel = rubricPct !== null ? 'Rubric match' : (semanticPct !== null ? 'Semantic match' : 'Match fit');
         const canInterview = app.status === 'shortlisted' || app.status === 'interview_linked';
-        
+
         let statusBadge;
         if (app.status === 'shortlisted') {
-          statusBadge = '<span class="tag" style="background:var(--success-subtle); color:var(--success-text); border-color:rgba(16,185,129,0.3); font-weight:600;">Shortlisted — Interview Ready</span>';
+          statusBadge = '<span class="chip chip-success">Shortlisted — Interview Ready</span>';
         } else if (app.status === 'interview_linked') {
-          statusBadge = '<span class="tag" style="background:var(--primary-subtle); color:var(--primary); border-color:var(--primary-glow); font-weight:600;">Interview Linked</span>';
+          statusBadge = '<span class="chip">Interview Linked</span>';
         } else if (app.status === 'rejected') {
-          statusBadge = '<span class="tag">Not Shortlisted</span>';
+          statusBadge = '<span class="chip">Not Shortlisted</span>';
         } else if (app.status === 'needs_human_review') {
-          statusBadge = '<span class="tag" style="background:var(--warning-subtle); color:var(--warning-text); border-color:rgba(245,158,11,0.3);">Under Review</span>';
+          statusBadge = '<span class="chip chip-warning">Under Review</span>';
         } else {
-          statusBadge = `<span class="tag">${app.status.replace(/_/g, ' ')}</span>`;
+          statusBadge = `<span class="chip">${app.status.replace(/_/g, ' ')}</span>`;
         }
 
         return `
         <div class="card" style="margin-bottom:0.75rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem; padding:1rem 1.25rem;">
           <div style="flex:1; min-width:240px;">
-            <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.35rem;">
-              <h4 style="font-weight:600; font-size:1.05rem; margin:0;">Role: ${app.job_id}</h4>
+            <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.35rem; flex-wrap:wrap;">
+              <h4 style="font-weight:600; font-size:1.05rem; margin:0; letter-spacing:-0.01em;">Role: ${app.job_id}</h4>
               ${statusBadge}
             </div>
             <p class="card-sub" style="margin:0;">
-              ${matchLabel}: <strong style="color:var(--primary); font-family:var(--font-mono);">${matchPct !== null ? matchPct + '%' : 'pending'}</strong>
+              ${matchLabel}: <strong style="color:var(--ink); font-family:var(--font-mono);">${matchPct !== null ? matchPct + '%' : 'pending'}</strong>
               ${canInterview ? ' · <span style="color:var(--success-text); font-weight:500;">Eligible for on-demand interview</span>' : ''}
             </p>
           </div>
@@ -153,7 +156,7 @@
       `;
       }).join('');
     } catch (err) {
-      appListEl.innerHTML = `<p class="card-sub" style="color:var(--danger, #ef4444);">Could not load applications: ${err.message}</p>`;
+      appListEl.innerHTML = `<p class="card-sub" style="color:var(--danger-text);">Could not load applications: ${err.message}</p>`;
     }
   })();
 
@@ -188,11 +191,11 @@
       listEl.innerHTML = practice.map(job => `
         <div class="job-card" style="margin-bottom:0.5rem;" onclick="window.location.href='apply.html?job_id=${encodeURIComponent(job.job_id)}'">
           <h4 style="font-weight:600; font-size:0.95rem; margin-bottom:0.25rem;">${job.title}</h4>
-          <span class="tag">Practice</span>
+          <span class="chip chip-info">Practice</span>
         </div>
       `).join('');
     } catch (err) {
-      listEl.innerHTML = `<p class="card-sub" style="color:var(--danger, #ef4444);">Could not load practice interviews: ${err.message}</p>`;
+      listEl.innerHTML = `<p class="card-sub" style="color:var(--danger-text);">Could not load practice interviews: ${err.message}</p>`;
     }
   })();
 
