@@ -360,19 +360,7 @@ function renderNavbar(activePage = '') {
   navContainer.innerHTML = `
     <header class="navbar">
       <div class="brand-logo" onclick="window.location.href='index.html'">
-        <svg class="brand-mark" viewBox="0 0 120 120" aria-hidden="true">
-          <rect x="56" y="6" width="8" height="34" fill="var(--primary)"></rect>
-          <rect x="56" y="80" width="8" height="34" fill="var(--primary)"></rect>
-          <rect x="6" y="56" width="34" height="8" fill="var(--primary)"></rect>
-          <rect x="80" y="56" width="34" height="8" fill="var(--primary)"></rect>
-          <rect x="30" y="30" width="8" height="8" fill="var(--primary)"></rect>
-          <rect x="82" y="30" width="8" height="8" fill="var(--primary)"></rect>
-          <rect x="30" y="82" width="8" height="8" fill="var(--primary)"></rect>
-          <rect x="82" y="82" width="8" height="8" fill="var(--primary)"></rect>
-          <rect x="44" y="44" width="8" height="32" fill="var(--bg)"></rect>
-          <rect x="68" y="44" width="8" height="32" fill="var(--bg)"></rect>
-          <rect x="52" y="56" width="16" height="8" fill="var(--bg)"></rect>
-        </svg>
+        <img class="brand-mark" src="assets/openhire.svg" alt="OpenHire">
         OpenHire
       </div>
 

@@ -22,15 +22,12 @@
   .mark-tile {
     width: 24px;
     height: 24px;
-    border-radius: var(--radius-sm);
-    background: var(--ink);
-    color: var(--surface);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
   }
-  .mark-tile svg { width: 14px; height: 14px; }
+  .mark-tile img { width: 22px; height: 22px; }
   #loggedOutNav,
   #loggedInNav { display: flex; align-items: center; gap: 0.6rem; }
 
@@ -234,9 +231,7 @@
 <header class="navbar">
   <div class="brand-logo" onclick="navigateTo('landing')">
     <span class="mark-tile">
-      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
-        <path d="M2 8.2v1.4"/><path d="M5 4.6v5"/><path d="M8 2v7.6"/><path d="M11 5v4.6"/>
-      </svg>
+      <img src="assets/openhire.svg" alt="OpenHire logo">
     </span>
     OpenHire
   </div>
