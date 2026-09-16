@@ -139,7 +139,8 @@
         method: 'POST',
         body: { candidate_name: name, resume_text: resume },
       });
-      setCurrentUser(Object.assign({}, user, { role: 'candidate', candidate_id: candidate.candidate_id }));
+      const currentRole = (user && user.role) ? user.role : 'candidate';
+      setCurrentUser(Object.assign({}, user, { role: currentRole, candidate_id: candidate.candidate_id }));
 
       // 2. Create the application.
       btn.textContent = 'Submitting application...';
@@ -166,6 +167,10 @@
       const isShortlisted = ourApplication.status === 'shortlisted' || ourApplication.status === 'interview_linked';
       const isRejected = ourApplication.status === 'rejected';
 
+      const isRecruiterUser = user && user.role === 'recruiter';
+      const dashboardHref = isRecruiterUser ? 'recruiter.html' : 'candidate.html';
+      const dashboardName = isRecruiterUser ? 'Recruiter Dashboard' : 'Candidate Dashboard';
+
       // Render the result card dynamically in place of the form
       const cardEl = document.querySelector('.card');
       if (isShortlisted) {
@@ -190,7 +195,7 @@
             <div style="background:var(--success-subtle); border:1px solid var(--success-border); border-left:3px solid var(--success); border-radius:var(--radius); padding:1rem; margin-bottom:1.5rem; text-align:left;">
               <strong style="color:var(--success-text); font-size:0.9rem;"><i class="ph-bold ph-microphone" aria-hidden="true"></i> On-Demand AI Voice Interview</strong>
               <p style="font-size:0.85rem; color:var(--ink-2); margin:0.3rem 0 0;">
-                You can give your structured interview <strong>right now</strong>, or <strong>whenever you want</strong> by logging into your Candidate Dashboard.
+                You can give your structured interview <strong>right now</strong>, or <strong>whenever you want</strong> by logging into your ${dashboardName}.
               </p>
             </div>
 
@@ -198,8 +203,8 @@
               <button class="btn-primary btn-lg" onclick="startInterviewNow('${ourApplication.application_id}')">
                 <i class="ph-bold ph-microphone" aria-hidden="true"></i>Start Interview Now
               </button>
-              <button class="btn-outline" style="padding:0.6rem; font-size:0.9rem;" onclick="window.location.href='candidate.html'">
-                Go to Candidate Dashboard (Take Later)
+              <button class="btn-outline" style="padding:0.6rem; font-size:0.9rem;" onclick="window.location.href='${dashboardHref}'">
+                Go to ${dashboardName} (Take Later)
               </button>
             </div>
           </div>
@@ -221,8 +226,8 @@
                 ${escapeHtml(ourApplication.matching_score && ourApplication.matching_score.explanation || 'Your profile did not meet the auto-shortlisting criteria for this specific role at this time.')}
               </p>
             </div>
-            <button class="btn-primary" style="width:100%;" onclick="window.location.href='candidate.html'">
-              Browse Other Open Positions
+            <button class="btn-primary" style="width:100%;" onclick="window.location.href='${dashboardHref}'">
+              ${isRecruiterUser ? 'Go to Recruiter Dashboard' : 'Browse Other Open Positions'}
             </button>
           </div>
         `;
@@ -243,8 +248,8 @@
                 ${displayPct !== null ? `Match score: ${displayPct}%. ` : ''}A recruiter will review your application. You will be able to launch your interview from your dashboard once approved.
               </p>
             </div>
-            <button class="btn-primary" style="width:100%;" onclick="window.location.href='candidate.html'">
-              Go to Candidate Dashboard
+            <button class="btn-primary" style="width:100%;" onclick="window.location.href='${dashboardHref}'">
+              Go to ${dashboardName}
             </button>
           </div>
         `;

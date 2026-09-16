@@ -50,4 +50,32 @@ class LLMCredentialResponse(BaseModel):
         )
 
 
-__all__ = ["LLMCredentialResponse", "SaveLLMCredentialRequest"]
+class TestLLMCredentialRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    provider: Optional[str] = "gemini"
+    api_key: Optional[str] = None
+    model: Optional[str] = None
+
+    def validate_provider(self) -> None:
+        if self.provider and self.provider not in _SUPPORTED_PROVIDERS:
+            raise BadRequestError(
+                f"Unsupported provider {self.provider!r}. "
+                f"Supported: {', '.join(sorted(_SUPPORTED_PROVIDERS))}."
+            )
+
+
+class TestLLMCredentialResponse(BaseModel):
+    success: bool
+    provider: str
+    model: Optional[str] = None
+    latency_ms: int
+    message: str
+
+
+__all__ = [
+    "LLMCredentialResponse",
+    "SaveLLMCredentialRequest",
+    "TestLLMCredentialRequest",
+    "TestLLMCredentialResponse",
+]

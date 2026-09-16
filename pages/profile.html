@@ -354,14 +354,13 @@ const BYOK_PROVIDERS = [
 // Known Gemini model names with real free-tier quota (checked against
 // Google AI Studio's usage dashboard); first entry is pre-selected.
 const BYOK_GEMINI_MODELS = [
-  'gemini-2.5-flash',
-  'gemini-2.5-flash-lite',
-  'gemini-3-flash-preview',
-  'gemini-3.1-flash-lite',
-  'gemini-3.5-flash',
+  'gemini-flash-lite-latest',
   'gemini-3.5-flash-lite',
+  'gemini-3.5-flash',
   'gemini-3.6-flash',
   'gemini-3.7-flash',
+  'gemini-3-flash-preview',
+  'gemini-3.1-flash-lite',
 ];
 
 async function fetchMyLlmCredential() {
@@ -381,12 +380,17 @@ function renderApiKeysEditableForm(container, credential) {
       of your choice, spending your own quota instead of OpenHire's.
     </p>
     ${credential ? `
-      <p class="card-sub">
-        Current: <strong>${credential.provider}</strong>${credential.model ? ` (${credential.model})` : ''},
-        key <code>${credential.key_hint}</code>
+      <p class="card-sub" style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+        <span>Current: <strong>${credential.provider}</strong>${credential.model ? ` (${credential.model})` : ''},
+        key <code>${credential.key_hint}</code></span>
+        <span style="font-size:11px; padding:2px 8px; border-radius:12px; font-weight:600; text-transform:uppercase; background:${credential.status === 'active' ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)'}; color:${credential.status === 'active' ? 'var(--success, #16a34a)' : 'var(--danger-text, #ef4444)'};">${credential.status}</span>
       </p>
-      ${credential.status === 'failed' ? `<p class="form-status error">This key stopped working: ${credential.last_error || 'unknown error'}. OpenHire is using its own key until you save a new one.</p>` : ''}
-      <button class="btn-outline" id="removeApiKeyBtn" type="button">Remove key</button>
+      ${credential.status === 'failed' ? `<p class="form-status error" style="margin-bottom:0.75rem;">This key stopped working: ${credential.last_error || 'unknown error'}. OpenHire is using its own key until you save a new one.</p>` : ''}
+      <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap; margin-bottom:1rem;">
+        <button class="btn-outline btn-sm" id="testSavedApiKeyBtn" type="button">Test saved key</button>
+        <button class="btn-outline btn-sm" id="removeApiKeyBtn" type="button" style="color:var(--danger-text, #ef4444);">Remove key</button>
+        <span class="form-status" id="savedKeyTestStatus" style="margin:0; font-size:12px;"></span>
+      </div>
     ` : ''}
     <form id="apiKeyForm" style="margin-top:1rem;">
       <div class="form-group">
@@ -399,33 +403,142 @@ function renderApiKeysEditableForm(container, credential) {
       </div>
       <div class="form-group">
         <label class="form-label" for="apiKeyValue">API key</label>
-        <input class="form-control" id="apiKeyValue" type="password" autocomplete="off" required>
+        <div style="display:flex; gap:0.5rem; align-items:center;">
+          <input class="form-control" id="apiKeyValue" type="password" autocomplete="off" placeholder="Paste your API key here..." required style="flex:1;">
+          <button type="button" class="btn-secondary btn-sm" id="testApiKeyBtn" style="white-space:nowrap; padding:0.45rem 0.9rem;">Test key</button>
+        </div>
+        <div class="form-status" id="apiKeyTestStatus" style="display:none; margin-top:0.4rem;"></div>
       </div>
-      <button type="submit" class="btn-primary">${credential ? 'Replace key' : 'Save key'}</button>
+      <div style="display:flex; gap:0.5rem; align-items:center;">
+        <button type="submit" class="btn-primary" id="saveApiKeyBtn">${credential ? 'Replace key' : 'Save key'}</button>
+      </div>
       <div class="form-status" id="apiKeyFormStatus"></div>
     </form>
   `;
 
+  const keyInput = document.getElementById('apiKeyValue');
+  const testBtn = document.getElementById('testApiKeyBtn');
+  const testStatus = document.getElementById('apiKeyTestStatus');
+  let lastTestedKey = '';
+  let lastTestedModel = '';
+
+  async function runInPlaceTest(explicitClick = false) {
+    const key = keyInput.value.trim();
+    const provider = document.getElementById('apiKeyProvider').value;
+    const model = document.getElementById('apiKeyModel').value || null;
+
+    if (!key) {
+      if (explicitClick) {
+        testStatus.style.display = 'block';
+        testStatus.textContent = 'Please enter an API key first.';
+        testStatus.className = 'form-status error';
+      }
+      return;
+    }
+
+    if (!explicitClick && key === lastTestedKey && model === lastTestedModel) {
+      return;
+    }
+    lastTestedKey = key;
+    lastTestedModel = model;
+
+    testStatus.style.display = 'block';
+    testStatus.textContent = `Testing API key in place with ${provider}${model ? ` (${model})` : ''}...`;
+    testStatus.className = 'form-status';
+    testBtn.disabled = true;
+    const originalBtnText = testBtn.textContent;
+    testBtn.textContent = 'Testing...';
+
+    try {
+      const res = await apiRequest('/auth/me/llm-credential/test', {
+        method: 'POST',
+        body: {
+          provider,
+          model,
+          api_key: key,
+        },
+      });
+
+      if (res && res.success) {
+        testStatus.textContent = `✓ ${res.message || 'API key is valid and working!'}`;
+        testStatus.className = 'form-status success';
+      } else {
+        testStatus.textContent = `✗ ${res && res.message ? res.message : 'Validation failed. Check your API key.'}`;
+        testStatus.className = 'form-status error';
+      }
+    } catch (err) {
+      testStatus.textContent = `✗ ${err.message || 'Validation request failed.'}`;
+      testStatus.className = 'form-status error';
+    } finally {
+      testBtn.disabled = false;
+      testBtn.textContent = originalBtnText;
+    }
+  }
+
+  testBtn.addEventListener('click', () => runInPlaceTest(true));
+  keyInput.addEventListener('change', () => runInPlaceTest(false));
+
+  const testSavedBtn = document.getElementById('testSavedApiKeyBtn');
+  const savedKeyStatus = document.getElementById('savedKeyTestStatus');
+  if (testSavedBtn && savedKeyStatus) {
+    testSavedBtn.addEventListener('click', async () => {
+      testSavedBtn.disabled = true;
+      const originalText = testSavedBtn.textContent;
+      testSavedBtn.textContent = 'Testing...';
+      savedKeyStatus.textContent = 'Testing saved key...';
+      savedKeyStatus.className = 'form-status';
+
+      try {
+        const res = await apiRequest('/auth/me/llm-credential/test', {
+          method: 'POST',
+          body: {},
+        });
+
+        if (res && res.success) {
+          savedKeyStatus.textContent = `✓ ${res.message || 'Saved key is working!'}`;
+          savedKeyStatus.className = 'form-status success';
+          if (credential && credential.status === 'failed') {
+            const refreshed = await fetchMyLlmCredential();
+            renderApiKeysEditableForm(container, refreshed);
+          }
+        } else {
+          savedKeyStatus.textContent = `✗ ${res && res.message ? res.message : 'Saved key test failed.'}`;
+          savedKeyStatus.className = 'form-status error';
+        }
+      } catch (err) {
+        savedKeyStatus.textContent = `✗ ${err.message || 'Test failed.'}`;
+        savedKeyStatus.className = 'form-status error';
+      } finally {
+        testSavedBtn.disabled = false;
+        testSavedBtn.textContent = originalText;
+      }
+    });
+  }
+
   document.getElementById('apiKeyForm').addEventListener('submit', async (event) => {
     event.preventDefault();
-    const status = document.getElementById('apiKeyFormStatus');
-    status.textContent = '';
-    status.className = 'form-status';
+    const saveStatus = document.getElementById('apiKeyFormStatus');
+    saveStatus.textContent = 'Validating and saving API key...';
+    saveStatus.className = 'form-status';
+    const saveBtn = document.getElementById('saveApiKeyBtn');
+    if (saveBtn) saveBtn.disabled = true;
+
     try {
       const saved = await apiRequest('/auth/me/llm-credential', {
         method: 'PUT',
         body: {
           provider: document.getElementById('apiKeyProvider').value,
           model: document.getElementById('apiKeyModel').value || null,
-          api_key: document.getElementById('apiKeyValue').value,
+          api_key: document.getElementById('apiKeyValue').value.trim(),
         },
       });
-      status.textContent = 'Saved.';
-      status.classList.add('success');
+      saveStatus.textContent = '✓ Saved.';
+      saveStatus.className = 'form-status success';
       renderApiKeysEditableForm(container, saved);
     } catch (err) {
-      status.textContent = err.message || 'Could not save this key.';
-      status.classList.add('error');
+      saveStatus.textContent = err.message || 'Could not save this key.';
+      saveStatus.className = 'form-status error';
+      if (saveBtn) saveBtn.disabled = false;
     }
   });
 
@@ -444,15 +557,6 @@ function renderApiKeysEditableForm(container, credential) {
 
 async function renderApiKeysCard(profile) {
   const container = document.getElementById('apiKeysBody');
-  if (profile.user_type !== 'candidate') {
-    container.innerHTML = `
-      <p class="card-sub">
-        Bring-your-own-key is available for candidate accounts. As a
-        ${profile.user_type}, OpenHire's own key is always used on your behalf.
-      </p>
-    `;
-    return;
-  }
   try {
     const credential = await fetchMyLlmCredential();
     renderApiKeysEditableForm(container, credential);

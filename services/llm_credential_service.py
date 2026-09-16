@@ -10,6 +10,7 @@ long-lived object, never included in a response model, and never logged.
 from __future__ import annotations
 
 from datetime import datetime, timezone
+import time
 from typing import Optional
 
 from cryptography.fernet import Fernet, InvalidToken
@@ -56,7 +57,7 @@ class LLMCredentialService:
         candidate mid-interview."""
         test_provider = build_provider(provider, api_key=api_key, model=model)
         try:
-            await test_provider.generate("Reply with the single word: ok", max_tokens=5)
+            await test_provider.generate("Reply with the single word: ok", max_tokens=20)
         except (LLMPermanentError, LLMTransientError) as e:
             raise BadRequestError(
                 f"Could not validate this {provider} API key: {e}",
@@ -90,6 +91,72 @@ class LLMCredentialService:
             "BYOK credential deleted",
             extra={"event": "byok_credential_deleted", "user_id": user_id},
         )
+
+    async def test_key(
+        self, *, provider: str, api_key: str, model: Optional[str] = None
+    ) -> dict:
+        """Test an API key by making a minimal generation call in place, measuring latency."""
+        test_provider = build_provider(provider, api_key=api_key, model=model)
+        start_time = time.monotonic()
+        try:
+            await test_provider.generate("Reply with the single word: ok", max_tokens=20)
+            elapsed_ms = max(1, int((time.monotonic() - start_time) * 1000))
+            resolved_model = model or getattr(test_provider, "model", None)
+            return {
+                "success": True,
+                "provider": provider,
+                "model": resolved_model,
+                "latency_ms": elapsed_ms,
+                "message": f"API key is valid and working ({elapsed_ms}ms).",
+            }
+        except Exception as e:
+            elapsed_ms = max(1, int((time.monotonic() - start_time) * 1000))
+            resolved_model = model or getattr(test_provider, "model", None)
+            logger.warning(
+                "BYOK test key failed",
+                extra={"event": "byok_test_failed", "provider": provider, "error": str(e)},
+            )
+            return {
+                "success": False,
+                "provider": provider,
+                "model": resolved_model,
+                "latency_ms": elapsed_ms,
+                "message": f"Could not validate {provider} API key: {e}",
+            }
+
+    async def test_saved(self, user_id: str, model: Optional[str] = None) -> dict:
+        """Test the user's currently saved BYOK credential in place."""
+        record = await self._credentials.get(user_id)
+        if record is None:
+            raise BadRequestError("No saved API key found to test.")
+
+        plaintext_key = self._fernet.decrypt(record.encrypted_key).decode("utf-8")
+        result = await self.test_key(
+            provider=record.provider,
+            api_key=plaintext_key,
+            model=model or record.model,
+        )
+
+        if result["success"] and record.status == CredentialStatus.FAILED:
+            updated = record.model_copy(
+                update={
+                    "status": CredentialStatus.ACTIVE,
+                    "last_error": None,
+                    "last_error_at": None,
+                }
+            )
+            await self._credentials.save(updated)
+        elif not result["success"]:
+            failed = record.model_copy(
+                update={
+                    "status": CredentialStatus.FAILED,
+                    "last_error": result["message"],
+                    "last_error_at": datetime.now(timezone.utc),
+                }
+            )
+            await self._credentials.save(failed)
+
+        return result
 
     async def resolve_provider_for_user(self, user_id: str) -> Optional[LLMProvider]:
         """The provider to use for calls made on `user_id`'s behalf: their

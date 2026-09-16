@@ -17,6 +17,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 
 from agents.rubric_generator.agent import RubricGeneratorAgent
+from api.dependencies import apply_llm_context_for_recruiter
 from core.dependencies import (
     get_application_repository,
     get_candidate_repository,
@@ -105,7 +106,12 @@ class RubricVersionsResponse(BaseModel):
 # Rubric lifecycle
 # --------------------------------------------------------------------------
 
-@router.post("/{job_id}/rubric/draft", response_model=JobRubric, status_code=201)
+@router.post(
+    "/{job_id}/rubric/draft",
+    response_model=JobRubric,
+    status_code=201,
+    dependencies=[Depends(apply_llm_context_for_recruiter)],
+)
 async def draft_rubric(
     job_id: str,
     jobs: JobRepository = Depends(get_job_repository),

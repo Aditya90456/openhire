@@ -90,17 +90,19 @@ async def test_get_with_no_credential_returns_204(client_and_auth):
 
 
 @pytest.mark.asyncio
-async def test_recruiter_gets_403(client_and_auth):
+async def test_recruiter_can_save_credential(client_and_auth):
     client, auth_service = client_and_auth
     _user, token, _r = await auth_service.signup(
         email="recruiter@example.com", password="password123", user_type="recruiter"
     )
-    response = client.put(
-        "/auth/me/llm-credential",
-        json={"provider": "gemini", "api_key": "sk-test", "model": "gemini-2.5-flash"},
-        headers={"Authorization": f"Bearer {token}"},
-    )
-    assert response.status_code == 403
+    with _mock_validation_ok():
+        response = client.put(
+            "/auth/me/llm-credential",
+            json={"provider": "gemini", "api_key": "sk-test", "model": "gemini-flash-lite-latest"},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+    assert response.status_code == 200
+    assert response.json()["provider"] == "gemini"
 
 
 @pytest.mark.asyncio
@@ -170,3 +172,106 @@ async def test_delete_removes_the_credential(client_and_auth):
 
     get_response = client.get("/auth/me/llm-credential", headers={"Authorization": f"Bearer {token}"})
     assert get_response.status_code == 204
+
+
+@pytest.mark.asyncio
+async def test_test_key_in_place_success_does_not_persist(client_and_auth):
+    client, auth_service = client_and_auth
+    _user, token, _r = await auth_service.signup(
+        email="candidate@example.com", password="password123", user_type="candidate"
+    )
+    with _mock_validation_ok():
+        response = client.post(
+            "/auth/me/llm-credential/test",
+            json={"provider": "gemini", "api_key": "sk-test123", "model": "gemini-flash-lite-latest"},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["success"] is True
+    assert data["provider"] == "gemini"
+    assert "latency_ms" in data
+    assert "valid and working" in data["message"]
+
+    # Key was NOT persisted
+    get_res = client.get("/auth/me/llm-credential", headers={"Authorization": f"Bearer {token}"})
+    assert get_res.status_code == 204
+
+
+@pytest.mark.asyncio
+async def test_test_key_in_place_failure_returns_success_false(client_and_auth):
+    client, auth_service = client_and_auth
+    _user, token, _r = await auth_service.signup(
+        email="candidate@example.com", password="password123", user_type="candidate"
+    )
+    with _mock_validation_fails():
+        response = client.post(
+            "/auth/me/llm-credential/test",
+            json={"provider": "gemini", "api_key": "sk-bad123", "model": "gemini-flash-lite-latest"},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["success"] is False
+    assert "Could not validate gemini API key" in data["message"]
+
+
+@pytest.mark.asyncio
+async def test_test_key_unsupported_provider_returns_400(client_and_auth):
+    client, auth_service = client_and_auth
+    _user, token, _r = await auth_service.signup(
+        email="candidate@example.com", password="password123", user_type="candidate"
+    )
+    response = client.post(
+        "/auth/me/llm-credential/test",
+        json={"provider": "unsupported_provider", "api_key": "sk-123"},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 400
+
+
+@pytest.mark.asyncio
+async def test_test_saved_key_success(client_and_auth):
+    client, auth_service = client_and_auth
+    _user, token, _r = await auth_service.signup(
+        email="candidate@example.com", password="password123", user_type="candidate"
+    )
+    with _mock_validation_ok():
+        # First save a key
+        client.put(
+            "/auth/me/llm-credential",
+            json={"provider": "gemini", "api_key": "sk-saved123", "model": "gemini-flash-lite-latest"},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        # Test saved key with empty body
+        response = client.post(
+            "/auth/me/llm-credential/test",
+            json={},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["success"] is True
+    assert data["provider"] == "gemini"
+
+
+@pytest.mark.asyncio
+async def test_test_saved_key_when_none_saved_returns_400(client_and_auth):
+    client, auth_service = client_and_auth
+    _user, token, _r = await auth_service.signup(
+        email="candidate@example.com", password="password123", user_type="candidate"
+    )
+    response = client.post(
+        "/auth/me/llm-credential/test",
+        json={},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 400
+    assert "No saved API key found" in response.json()["detail"]
+
+
+@pytest.mark.asyncio
+async def test_test_key_unauthenticated_returns_401(client_and_auth):
+    client, _auth_service = client_and_auth
+    response = client.post("/auth/me/llm-credential/test", json={"api_key": "sk-test"})
+    assert response.status_code == 401

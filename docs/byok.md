@@ -1,22 +1,18 @@
 # Bring Your Own Key (BYOK)
 
-A candidate can save their own LLM provider API key on their profile page
+A user can save their own LLM provider API key on their profile page
 (`pages/profile.html`, "API Keys" card). The credential storage, encryption,
-and API are provider-agnostic infrastructure, but access is candidate-only
-and the supported provider is currently narrowed to Gemini (see "Supported
-providers" below).
+and API are provider-agnostic infrastructure, and the supported provider
+is currently narrowed to Gemini (see "Supported providers" below).
 
-**Not yet wired to any candidate-facing LLM call.** The recruiter-side
-context wiring built earlier (`apply_llm_context_for_recruiter`,
-`api/dependencies.py`) resolves a saved credential via the job's *owning
-recruiter* for job description analysis (`POST /jobs`), resume matching
-(`POST /jobs/{job_id}/match`), and post-interview evaluation. Under this
-candidate-only access model, recruiters can never have a saved credential,
-so that wiring will simply never find one to use — those calls always run
-on OpenHire's system key now. Connecting a candidate's saved key to an
-actual candidate-facing LLM call path (e.g. interview question generation)
-is a documented follow-up, **not yet implemented**. Resume parsing on
-upload also still uses OpenHire's system key, as before.
+**Pipeline Resolution:**
+- **Recruiter keys:** When an authenticated recruiter saves a key, `apply_llm_context_for_recruiter`
+  (`api/dependencies.py`) resolves that key for synchronous operations like job description analysis
+  (`POST /jobs`) and resume matching (`POST /jobs/{job_id}/match`). During post-interview evaluation
+  (`services/evaluation_service.py`), the job's owning recruiter's key is resolved to run evaluations.
+- **Candidate keys:** Candidate credentials can be saved and managed on their profile page. Connecting
+  a candidate's saved key directly to candidate-facing interview question generation is a documented
+  follow-up.
 
 ## Enabling it
 
@@ -46,11 +42,15 @@ schema migration. No `litellm`-style universal routing regardless.
 - `PUT /auth/me/llm-credential` → body `{provider, api_key, model?}`. Makes
   one live validation call before saving; a bad key returns `400` and
   writes nothing.
+- `POST /auth/me/llm-credential/test` → body `{provider?, api_key?, model?}`.
+  Tests an entered key (or the saved credential if `api_key` is omitted)
+  in place against the provider without saving, returning
+  `{success, provider, model, latency_ms, message}`.
 - `DELETE /auth/me/llm-credential` → removes the credential; the account
   reverts to OpenHire's system key.
 
-All three require an authenticated candidate principal (`require_candidate`)
-— a recruiter or admin gets `403`. None of them ever returns the key itself.
+All four require an authenticated principal (`require_authenticated`)
+— unauthenticated requests get `401`. None of them ever returns the key itself.
 
 ## Key handling
 
