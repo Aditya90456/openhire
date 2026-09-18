@@ -10,7 +10,7 @@
 
 ---
 
-## ⚡ 60-Second Quickstart
+## Quickstart
 
 You do **not** need an API key or database to run or develop OpenHire. The default setup runs offline in mock mode:
 
@@ -34,7 +34,7 @@ python -m uvicorn api.app:app --reload
 
 ---
 
-## 🎯 How It Works
+## How It Works
 
 ```
 Recruiter Creates Job ──> Candidate Applies & Submits Resume
@@ -53,11 +53,11 @@ Recruiter Creates Job ──> Candidate Applies & Submits Resume
 1. **Job & Rubric Setup:** Recruiters define job requirements and competencies. The system drafts an evidence-bound evaluation rubric.
 2. **Resume Matching:** Candidate resumes (.pdf/.docx) are parsed via OCR/text extraction and scored against the approved rubric.
 3. **Adaptive Voice Interview:** Shortlisted candidates take a conversational voice interview powered by an adaptive state machine.
-4. **Multi-Agent Evaluation:** Sealed transcripts are scored across 13 specialized LLM agents, generating an evidence-backed candidate report.
+4. **Multi-Agent Evaluation:** Sealed transcripts are scored across 12 specialized LLM agents, generating an evidence-backed candidate report.
 
 ---
 
-## 🧠 Multi-Agent System
+## Multi-Agent System
 
 | Agent | Focus |
 |:---|:---|
@@ -76,7 +76,7 @@ Recruiter Creates Job ──> Candidate Applies & Submits Resume
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Backend:** Python 3.13, FastAPI, Uvicorn
 - **AI & Agents:** LangGraph, Pydantic v2
@@ -87,7 +87,7 @@ Recruiter Creates Job ──> Candidate Applies & Submits Resume
 
 ---
 
-## 🧪 Running Tests
+## Running Tests
 
 OpenHire includes a comprehensive test suite of **911 automated tests**:
 
@@ -101,7 +101,7 @@ pytest tests/test_voice_layer.py -v
 
 ---
 
-## 🤝 Contributing & Community
+## Contributing & Community
 
 Contributions are welcome! Please check:
 
@@ -110,6 +110,8 @@ Contributions are welcome! Please check:
 - **[SECURITY.md](SECURITY.md)** — Vulnerability disclosure policy.
 - **[OpenBox Bug Board](pages/openbox.html)** — Platform-wide issue tracker.
 
-## 📝 License
+> **Note:** AI tools are welcome for contributing — just review and verify the output before submitting. Unreviewed AI-generated PR/issue spam will be closed. See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+
+## License
 
 Distributed under the [MIT License](LICENSE).

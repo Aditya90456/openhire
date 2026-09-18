@@ -52,3 +52,14 @@ The test runner automatically pins providers to `mock` mode to ensure hermetic, 
 5. Open a Pull Request referencing the issue number.
 
 Please ensure you adhere to our **[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)**. For security vulnerabilities, review **[SECURITY.md](SECURITY.md)**.
+
+---
+
+## 🤖 Use AI, Don't Spam With It
+
+AI coding tools are welcome — use them to write code, drafts, or issue reports. Just make sure every issue and PR you open reflects work you've personally reviewed and understand.
+
+- Read and verify AI-generated content against this codebase before submitting it — don't paste it in unreviewed.
+- Do not mass-file issues or PRs from an AI agent without checking each one is accurate and relevant.
+- Low-effort, templated, or clearly unreviewed AI output (vague descriptions, fabricated file paths, changes that don't build or pass tests) will be closed without discussion.
+- Repeated spam may result in a block from the repository.

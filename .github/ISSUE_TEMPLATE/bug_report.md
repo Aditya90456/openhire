@@ -31,3 +31,5 @@ If applicable, add screenshots or console/terminal output to help explain your p
 
 **Additional context**
 Add any other context about the problem here.
+
+- [ ] AI tools are welcome, but I've verified this bug myself before submitting
