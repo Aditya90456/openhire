@@ -104,7 +104,7 @@
 
   let allReports = [];
   let activeFilter = 'all';
-  const isRecruiter = (getCurrentUser() || {}).role === 'recruiter';
+  const isAdmin = (getCurrentUser() || {}).role === 'admin';
 
   function escapeHtml(text) {
     return String(text == null ? '' : text)
@@ -170,7 +170,7 @@
     }
 
     listEl.innerHTML = rows.map(r => {
-      const statusControl = isRecruiter ? `
+      const statusControl = isAdmin ? `
         <select class="form-control" style="padding:0.3rem 0.6rem; font-size:12px; width:auto;" onchange="changeStatus('${r.bug_id}', this.value)">
           ${Object.keys(STATUS_LABELS).map(s => `<option value="${s}" ${s === r.status ? 'selected' : ''}>${STATUS_LABELS[s]}</option>`).join('')}
         </select>

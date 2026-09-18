@@ -25,3 +25,5 @@ A clear and concise description of any alternative solutions or features you've 
 
 **Additional context**
 Add any other context, wireframes, screenshots, or architectural considerations here.
+
+- [ ] AI tools are welcome, but I've reviewed this request myself before submitting

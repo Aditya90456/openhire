@@ -20,6 +20,7 @@ Because OpenHire deals with real candidates, hiring assessments, and AI evaluati
 * Harassment, derogatory comments, personal/political attacks, or discriminatory conduct.
 * Publishing others' private information (PII, credentials, transcripts) without explicit consent.
 * Attempting to inject deliberate algorithmic bias, forged evidence, or backdoors into evaluation pipelines.
+* Spamming issues or pull requests with unreviewed AI-generated content. (Using AI tools to help contribute is fine — just review and verify the output before submitting it.)
 * Any behavior inappropriate in a professional open-source environment.
 
 ---

@@ -19,7 +19,7 @@ from api.models_bugs import (
     UpdateBugStatusRequest,
 )
 from core.dependencies import get_bug_report_service
-from core.security import Principal, require_authenticated, require_scopes
+from core.security import Principal, require_admin, require_authenticated
 from services.bug_report_service import BugReportService
 
 router = APIRouter(prefix="/bugs", tags=["openbox"])
@@ -76,11 +76,10 @@ async def update_bug_status(
     bug_id: str,
     payload: UpdateBugStatusRequest,
     service: BugReportService = Depends(get_bug_report_service),
-    principal: Principal = Depends(require_scopes("recruiter:write")),
+    principal: Principal = Depends(require_admin),
 ) -> BugReportResponse:
     """PATCH /bugs/{bug_id}/status - triage: move a report through OPEN ->
-    IN_PROGRESS -> RESOLVED/WONT_FIX. Recruiter-only, the same scope
-    api/routes/applications.py's shortlist/reject actions require.
+    IN_PROGRESS -> RESOLVED/WONT_FIX. Admin-only.
 
     Errors: 404 `not_found`. Idempotent - setting a report to the status it
     already has is a no-op success.
