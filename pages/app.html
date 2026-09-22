@@ -299,12 +299,22 @@
       <div class="form-group">
         <label class="form-label">Display Name</label>
         <input type="text" id="authName" class="form-control" placeholder="e.g. Alex Morgan" value="Alex Morgan">
+        <input type="email" id="authEmail" class="form-control" placeholder="e.g. alex.morgan@example.com" value="alex.morgan@example.com"  >
       </div>
 
       <div class="form-group">
         <label class="form-label">Role</label>
+        <label class="form-label">Company Experience</label>
+        <select  id="authCompany" class="form-control">
+          <option value="">Select Company</option>
+          <option value="Google">Google</option>
+          <option value="Microsoft">Microsoft</option>
+          <option value="Amazon">Amazon</option>
+          <option value="Facebook">Facebook</option>
+          <option value="Apple">Apple</option>
+        </select>
         <select id="authRole" class="form-control">
-          <option value="recruiter">Recruiter (Post Jobs, Manage Shortlists, Audit)</option>
+          <option value="recruiter">Recruiter (Post Jobs, Manage Shortlists, Audit)</option> 
           <option value="candidate">Candidate (Browse Jobs, Apply with Resume, Interview)</option>
         </select>
       </div>
