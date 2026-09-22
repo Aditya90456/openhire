@@ -299,24 +299,24 @@
       <div class="form-group">
         <label class="form-label">Display Name</label>
         <input type="text" id="authName" class="form-control" placeholder="e.g. Alex Morgan" value="Alex Morgan">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="authEmail">Email</label>
         <input type="email" id="authEmail" class="form-control" placeholder="e.g. alex.morgan@example.com" value="alex.morgan@example.com"  >
       </div>
 
       <div class="form-group">
-        <label class="form-label">Role</label>
-        <label class="form-label">Company Experience</label>
-        <select  id="authCompany" class="form-control">
-          <option value="">Select Company</option>
-          <option value="Google">Google</option>
-          <option value="Microsoft">Microsoft</option>
-          <option value="Amazon">Amazon</option>
-          <option value="Facebook">Facebook</option>
-          <option value="Apple">Apple</option>
-        </select>
-        <select id="authRole" class="form-control">
+        <label class="form-label" for="authRole">Role</label>
+        <select id="authRole" class="form-control" onchange="toggleCompanyField()">
           <option value="recruiter">Recruiter (Post Jobs, Manage Shortlists, Audit)</option> 
           <option value="candidate">Candidate (Browse Jobs, Apply with Resume, Interview)</option>
         </select>
+      </div>
+
+      <div class="form-group" id="authCompanyGroup">
+        <label class="form-label" for="authCompany">Company Experience</label>
+        <input type="text" id="authCompany" class="form-control" placeholder="e.g. Acme Corporation">
       </div>
 
       <button class="btn-primary auth-submit" onclick="handleLogin()">Continue to Dashboard</button>
@@ -682,10 +682,17 @@ function setRoleAndEnter(role) {
 
 function handleLogin() {
   const name = document.getElementById('authName').value || 'User';
+  const email = document.getElementById('authEmail').value;
   const role = document.getElementById('authRole').value;
-  currentUser = { name, role };
+  const company = role === 'recruiter' ? document.getElementById('authCompany').value : '';
+  currentUser = { name, email, company, role };
   updateNavState();
   navigateTo(role);
+}
+
+function toggleCompanyField() {
+  const role = document.getElementById('authRole').value;
+  document.getElementById('authCompanyGroup').hidden = role !== 'recruiter';
 }
 
 function logoutUser() {
